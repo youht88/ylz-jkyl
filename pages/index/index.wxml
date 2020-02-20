@@ -1,0 +1,46 @@
+<cu-custom bgColor="bg-gradual-green" isBack="{{false}}">
+  <view slot="backText">返回</view>
+  <view slot="content">个人健康应用</view>
+</cu-custom>
+
+<view class="cu-bar tabbar foot bg-white">
+    <view class="action text-green">
+      <view class="cuIcon-homefill"></view> 首页
+    </view>
+    <navigator class="action" url="../timeline/timeline">
+      <view class="action text-gray">
+        <view class="cuIcon-newshot"></view> 时间轴
+      </view>
+    </navigator>
+    <navigator class="action" url="../input/input">
+    <view class="action text-gray add-action">
+      <button class="cu-btn cuIcon-add bg-green shadow"></button>
+      记录
+    </view>
+    </navigator >
+    <navigator class="action" url="../chart/chart">
+    <view class="action text-gray">
+      <view class="cuIcon-rank">
+        <view class="cu-tag badge">99</view>
+      </view>
+      分析
+    </view>
+    </navigator>
+    
+    <navigator class="action" url="../config/config">
+    <view class="action text-gray" bind:tap="_test">
+      <view class="cuIcon-my">
+        <view class="cu-tag badge"></view>
+      </view>
+      我的
+    </view>
+    </navigator >
+</view>
+
+<view class="flex justify-center">
+  <button bind:tap="_startUpdateMap" class="cu-btn margin  bg-green">自动更新位置</button>
+  <button bind:tap="_stopUpdateMap" class="cu-btn margin  bg-red">停止更新位置</button>
+</view>
+<map show-location="true" id="map" class="" longitude="{{longitude?longitude:undefined}}" latitude="{{latitude?latitude:undefined}}" style="height:700px;width:100%"/>
+
+

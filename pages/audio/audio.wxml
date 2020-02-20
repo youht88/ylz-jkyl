@@ -1,0 +1,64 @@
+<!--pages/audio/audio.wxml-->
+<cu-custom bgColor="bg-gradual-green" isBack="{{true}}">
+  <view slot="backText">返回</view>
+  <view slot="content">音频测试</view>
+</cu-custom>
+
+
+<scroll-view scroll-y="true" class="bg-green light" style="height:350px">
+<view  class="margin-xs " wx:for="{{items}}" wx:key="index" >
+  <view class="cu-item solid-bottom text-red text-cut" 
+     bind:tap="_onPlay" data-src="{{item.tempFilePath}}">
+    <text class="cuIcon-title text-blue"><text class="text-red text-xxl">{{item.result}}</text></text>  
+  </view>
+</view>
+</scroll-view>
+
+
+<form>
+  <view class="cu-form-group  margin-top-xs">
+    <input placeholder="输入自己的健康记录"></input>
+	  <button bind:touchstart="_onVoiceStart"
+            bind:touchend  ="_onVoiceEnd"
+            class="cu-btn bg-red shadow">清空</button>
+	  <button bind:tap="_onClear"
+            class="cu-btn margin-left-xs bg-green shadow">语音</button>
+	</view>
+</form>
+
+<view class="cu-chat">
+  <view class="cu-item self">
+    <view class="main">
+      <view class="content bg-green shadow">
+        <text>abcd</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="cu-chat">
+  <view class="cu-info">
+    <view class="main">
+      <view class="content bg-green shadow">
+        <text>abcd</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="cu-chat">
+  <view class="cu-item">
+    <view class="main">
+      <view class="content bg-green shadow">
+        <text>abcd</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<audio poster="{{poster}}" name="{{name}}" author="{{author}}" src="http://m10.music.126.net/20180809173001/070d716213a3cf7cb910b5b88b638eb8/ymusic/687c/a444/e9e3/66452e1efb0e3f108d6b899010c13ba8.mp3" id="myAudio" controls loop></audio>
+
+<button type="primary" bindtap="audioPlay">播放</button>
+<button type="primary" bindtap="audioPause">暂停</button>
+<button type="primary" bindtap="audio14">设置当前播放时间为14秒</button>
+<button type="primary" bindtap="audioStart">回到开头</button>

@@ -1,0 +1,29 @@
+<view  class="cu-chat">
+  <view  class="cu-item">
+    <view class="cu-avatar round" style="background-image:url(https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1582011561539&di=14561e3dd131bd5a1affd62acba02b8a&imgtype=0&src=http%3A%2F%2Fpic.51yuansu.com%2Fpic3%2Fcover%2F02%2F15%2F74%2F59ae81abe8639_610.jpg);"></view>
+    
+    <view class="main">
+      <view class="content shadow">
+        
+        <view class="flex flex-wrap justify-start">  
+          <map show-location="true" id="map" latitude="{{loc.latitude}}" longitude="{{loc.longitude}}" style="width:200px;height:150px"/>            
+        </view>
+        
+      </view>
+      <view class="flex flex-wrap  margin-lr margin-up-xl text-xs justify-start">
+        <view>({{fun.round2(loc.latitude,"°")}},{{fun.round2(loc.longitude,"°")}})</view>
+        <view>速度:{{loc.speed}}</view>
+      </view>
+    </view>
+      
+    
+    <view class="date"> {{item.dateTime}}</view>
+  </view>
+</view>
+
+<wxs module="fun">
+var round2 = function(data,unit) {
+  return Math.round(data*100)/100+unit  
+}
+module.exports.round2 = round2;
+</wxs>

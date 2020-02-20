@@ -1,0 +1,5 @@
+<view id="item{{index}}" class="cu-chat">
+    <view class="cu-info round">
+       {{item.msg}}
+    </view>
+</view>

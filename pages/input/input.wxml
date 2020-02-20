@@ -1,0 +1,29 @@
+
+<cu-custom bgColor="bg-gradual-red" isBack="{{true}}"><view slot="backText">返回</view><view slot="content">记录健康数据</view></cu-custom>
+<scroll-view scroll-y scroll-top="{{scrolltop}}">
+<block wx:for="{{items}}" wx:key="index">
+  <saying wx:if="{{item.type=='self'}}" item="{{item}}"/>
+  <info   wx:elif="{{item.type=='info'}}" item="{{item}}"/>
+  <eat    wx:elif="{{item.type=='eat'}}" item="{{item}}"/>
+  <sign   wx:elif="{{item.type=='sign_weightKg'}}" item="{{item}}"/> 
+  <sport   wx:elif="{{item.type=='sport_steps'}}" item="{{item}}"/> 
+  <behavior   wx:elif="{{item.type=='behavior_sleep'}}" item="{{item}}"/> 
+  <location   wx:elif="{{item.type=='location'}}" item="{{item}}"/> 
+</block>
+
+</scroll-view>
+
+<view class="cu-bar foot input {{InputBottom!=0?'cur':''}}" style="bottom:{{InputBottom}}px">
+  <view class="action">
+    <text class="cuIcon-refresh text-red" bind:tap="_onClear"></text>
+  </view>
+  <input class="solid-bottom" 
+         bind:focus="_onFocus"
+         bind:blur="_onBlur"
+         adjust-position="{{false}}" focus="{{false}}" maxlength="300" cursor-spacing="10" placeholder="录入您的健康数据" value="{{value}}"></input>
+  <view class="bg-{{color}} shadow text-sl text-center round margin" style="width:50px;height:50px" 
+          bind:touchstart="_onTouchStart"
+          bind:touchend="_onTouchEnd" >
+    <text class="cuIcon-voicefill"></text>
+  </view>
+ </view>

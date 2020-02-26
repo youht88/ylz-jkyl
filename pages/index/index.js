@@ -8,6 +8,7 @@ Page({
   data: {
     StatusBar: app.globalData.StatusBar,
     CustomBar: app.globalData.CustomBar,
+    Page: app.globalData.Page,
     motto: 'Hi 开发者！',
     userInfo: {},
     hasUserInfo: false,
@@ -58,6 +59,7 @@ Page({
     map = new Map("map")
     this._onMoveTo()
     console.log("wx.env.USER_DATA_PATH:",wx.env.USER_DATA_PATH)
+    this.doTest()
   },
   getUserInfo: function(e) {
     console.log(e)
@@ -66,5 +68,8 @@ Page({
       userInfo: e.detail.userInfo,
       hasUserInfo: true
     })
+  },
+  doTest(){
+    
   }
 })

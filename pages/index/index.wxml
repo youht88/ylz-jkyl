@@ -28,19 +28,21 @@
     </navigator>
     
     <navigator class="action" url="../config/config">
-    <view class="action text-gray" bind:tap="_test">
-      <view class="cuIcon-my">
-        <view class="cu-tag badge"></view>
+      <view class="action text-gray" bind:tap="_test">
+        <view class="cuIcon-my">
+          <view class="cu-tag badge"></view>
+        </view>
+        我的
       </view>
-      我的
-    </view>
     </navigator >
 </view>
 
-<view class="flex justify-center">
-  <button bind:tap="_startUpdateMap" class="cu-btn margin  bg-green">自动更新位置</button>
-  <button bind:tap="_stopUpdateMap" class="cu-btn margin  bg-red">停止更新位置</button>
-</view>
-<map show-location="true" id="map" class="" longitude="{{longitude?longitude:undefined}}" latitude="{{latitude?latitude:undefined}}" style="height:700px;width:100%"/>
+
+<map show-location="true" id="map" class="" longitude="{{longitude?longitude:undefined}}" latitude="{{latitude?latitude:undefined}}" style="height:{{Page}}px;width:100%">
+  <view class="flex margin padding" >
+    <button bind:tap="_startUpdateMap" class="cu-btn flex-sub bg-green">自动更新位置</button>
+    <button bind:tap="_stopUpdateMap" class="cu-btn flex-sub margin-left bg-red">停止更新位置</button>
+  </view>
+</map>
 
 

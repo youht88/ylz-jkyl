@@ -27,6 +27,75 @@ class Util{
       })
     })
   }
+  takePhoto(){
+    console.log("takePhoto is begin")
+    return new Promise((resolve,reject)=>{
+      const ctx = wx.createCameraContext()
+      console.log("ctx:",ctx)
+      ctx.takePhoto({
+        quality: 'high',
+        success: resolve,
+        fail:reject
+      })
+    }) 
+  }
+  //storage
+  setStorage(key,value) {
+    return new Promise((resolve, reject) => {
+      try{
+        let data = JSON.stringify(value)
+        wx.setStorage({
+          key: key,
+          data:data,
+          success: resolve,
+          fail: reject
+        })
+      }catch(e){
+        reject(e)
+      }
+    })
+  }
+  getStorage(key) {
+    return new Promise((resolve, reject) => {
+      try{
+        wx.getStorage({
+          key: key,
+          success: (res)=>{
+            resolve(JSON.parse(res.data))
+          },
+          fail: reject
+        })
+      }catch(e){
+        reject(e)
+      }
+    })
+  }
+  getStorageInfo() {
+    return new Promise((resolve, reject) => {
+      wx.getStorageInfo({
+        success: (res) => resolve(res),
+        fail: reject
+      })
+    })
+  }
+  clearStorageInfo() {
+    return new Promise((resolve, reject) => {
+      wx.clearStorageInfo({
+        success: (res) => resolve(res),
+        fail: reject
+      })
+    })
+  }
+  removeStorage(key) {
+    return new Promise((resolve, reject) => {
+      wx.removeStorage({
+        key : key,
+        success: resolve,
+        fail: reject
+      })
+    })
+  }
+
   //获取网络数据
   request(option) {
     return new Promise((resolve, reject) => {
@@ -36,6 +105,53 @@ class Util{
         data: option.data || {},
         success: resolve,
         fail: reject
+      })
+    })
+  }
+  downloadFile(option,pgComponent,key){
+    //pgComponent是一个progress组件，key为该组件反应进度指标（0-100）的值
+    return new Promise((resolve,reject)=>{
+      var task = wx.downloadFile(
+        {
+          url:option.url,
+          filePath:option.filePath,
+          success:resolve,
+          failt:reject
+        }
+      )
+      if (!pgComponent) return
+      task.onProgressUpdate((res)=>{
+        pgComponent.setData({ show: true, [key]: res.progress })
+        if (res.progress==100){
+          setTimeout(()=>{
+            pgComponent.setData({show:false,[key]:0})
+          },500)
+        }
+      })
+    })
+  }
+  uploadFile(option,pgComponent,key){
+    //pgComponent是一个progress组件，key为该组件反应进度指标（0-100）的值
+    return new Promise((resolve, reject) => {
+      var task = wx.uploadFile(
+        {
+          url: option.url,
+          filePath: option.filePath,
+          header:{"content-type":"multipart/form-data"},
+          name:option.name,
+          formData:option.formData,
+          success: resolve,
+          failt: reject
+        }
+      )
+      if (!pgComponent) return
+      task.onProgressUpdate((res) => {
+        pgComponent.setData({ show: true, [key]: res.progress })
+        if (res.progress == 100) {
+          setTimeout(() => {
+            pgComponent.setData({ show: false, [key]: 0 })
+          }, 500)
+        }
       })
     })
   }
@@ -71,7 +187,10 @@ class Util{
         obeyMuteSwitch: false,
         success: function (res) {
           console.log("succ tts", res.filename)
-          wx.createInnerAudioContext({src:res.filename,autoplay:true})
+          wx.createInnerAudioContext({src:encodeURI(res.filename),autoplay:true})
+          wx.playVoice({
+            filePath:encodeURI(res.filename)
+          })
           resolve(res)
         },
         fail: function (res) {
@@ -166,5 +285,5 @@ class Record{
 module.exports = {
   util  : new Util(),
   Map   : Map,
-  record: new Record()
+  Record: Record
 }

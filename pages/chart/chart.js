@@ -33,7 +33,8 @@ function initChart(canvas, width, height) {
 
 Page({
   data: {
-    ecs: [{onInit: initChart,width:"100%",height:200}]
+    ec: 
+      {onInit: initChart}
   },
   onReady() {
     setTimeout(function () {

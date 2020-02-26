@@ -7,7 +7,7 @@
     <view class="main">
       <view class="content bg-gradual-blue shadow">
         
-        <view class="flex flex-wrap justify-start">  
+        <view class="flex flex-direction justify-start">  
           <view >
             {{item.msg.eDate}}
             {{item.msg.eTime}}

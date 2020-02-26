@@ -1,3 +1,6 @@
 {
-  "usingComponents": {}
+  "usingComponents": {
+    "ylz-picker":"/common/ylz-picker/ylz-picker",
+    "ylz-steps": "/common/ylz-steps/ylz-steps"
+  }
 }

@@ -1,29 +1,58 @@
-
 <cu-custom bgColor="bg-gradual-red" isBack="{{true}}"><view slot="backText">返回</view><view slot="content">记录健康数据</view></cu-custom>
-<scroll-view scroll-y scroll-top="{{scrolltop}}">
+<ylz-progress id="progress" show="false" color="green" striped="true" active="true" value="0"/>
+<!--<audio id="audio1" src="{{audioFile}}" controls></audio>-->
+<scroll-view scroll-y scroll-into-view="item{{currIdx}}" scroll-with-animation>
 <block wx:for="{{items}}" wx:key="index">
-  <saying wx:if="{{item.type=='self'}}" item="{{item}}"/>
-  <info   wx:elif="{{item.type=='info'}}" item="{{item}}"/>
-  <eat    wx:elif="{{item.type=='eat'}}" item="{{item}}"/>
-  <sign   wx:elif="{{item.type=='sign_weightKg'}}" item="{{item}}"/> 
-  <sport   wx:elif="{{item.type=='sport_steps'}}" item="{{item}}"/> 
-  <behavior   wx:elif="{{item.type=='behavior_sleep'}}" item="{{item}}"/> 
-  <location   wx:elif="{{item.type=='location'}}" item="{{item}}"/> 
+  <saying wx:if="{{item.type=='self'}}" id="item{{index}}" item="{{item}}"/>
+  <info   wx:elif="{{item.type=='info'}}" id="item{{index}}" item="{{item}}"/>
+  <eat    wx:elif="{{item.type=='eat'}}" id="item{{index}}" item="{{item}}"/>
+  <sign   wx:elif="{{item.type=='sign_weightKg'}}" id="item{{index}}" item="{{item}}"/> 
+  <sport   wx:elif="{{item.type=='sport_steps'}}" id="item{{index}}" item="{{item}}"/> 
+  <behavior   wx:elif="{{item.type=='behavior_sleep'}}" id="item{{index}}" item="{{item}}"/> 
+  <location   wx:elif="{{item.type=='location'}}" id="item{{index}}" item="{{item}}"/> 
+  <chart   wx:elif="{{item.type=='chart'}}" id="item{{index}}" item="{{item}}"/> 
+  <photo   wx:elif="{{item.type=='photo'}}" id="item{{index}}" item="{{item}}"/> 
 </block>
 
 </scroll-view>
 
 <view class="cu-bar foot input {{InputBottom!=0?'cur':''}}" style="bottom:{{InputBottom}}px">
-  <view class="action">
-    <text class="cuIcon-refresh text-red" bind:tap="_onClear"></text>
-  </view>
   <input class="solid-bottom" 
          bind:focus="_onFocus"
          bind:blur="_onBlur"
          adjust-position="{{false}}" focus="{{false}}" maxlength="300" cursor-spacing="10" placeholder="录入您的健康数据" value="{{value}}"></input>
-  <view class="bg-{{color}} shadow text-sl text-center round margin" style="width:50px;height:50px" 
+  
+ </view>
+<!--tool bar !-->
+<view class="flex flex-direction margin-xs justify-between" style="position:fixed;bottom:100rpx;right:60rpx;width:100rpx;height:600rpx">
+  <view class="bg-green shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
+          bind:tap="_onQrcodeTap">
+    <text class="cuIcon-qrcode"></text>
+  </view>
+  <view class="bg-mauve shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx" 
+          bind:tap="_onCameraTap">
+    <text class="cuIcon-camera"></text>
+  </view>
+  <view class="bg-{{color}} shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
           bind:touchstart="_onTouchStart"
           bind:touchend="_onTouchEnd" >
     <text class="cuIcon-voicefill"></text>
   </view>
- </view>
+  <view class="bg-orange shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
+          bind:tap="_onTest" >
+    <text class="cuIcon-link"></text>
+  </view>
+   <view class="action bg-yellow shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
+          bind:tap="_onClear" >
+    <text class="cuIcon-refresh"></text>
+  </view>
+</view>
+
+<view wx:if="{{isCamera}}" class="flex flex-direction align-center"
+      style="position:fixed;top:100rpx;width:100%">
+  <camera device-position="back" flash="off" style="height:800rpx;width:90%"
+    binderror="error" ></camera>
+  <button class="margin" type="primary" bindtap="_takePhoto">拍照</button>
+</view>
+
+<!--<web-view wx:if="{{isHelp}}" src="{{'/assets/html/help.html'}}"/> -->

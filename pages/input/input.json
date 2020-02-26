@@ -1,11 +1,15 @@
 {
   "usingComponents": {
+    "ylz-progress": "/common/ylz-progress/ylz-progress",
+    
     "saying":"/components/saying/saying",
     "info": "/components/info/info",
     "eat": "/components/eat/eat",
     "sign": "/components/sign/sign",
     "sport": "/components/sport/sport",
     "behavior": "/components/behavior/behavior",
-    "location": "/components/location/location"
+    "location": "/components/location/location",
+    "chart": "/components/chart/chart",
+    "photo": "/components/photo/photo"
   }
 }

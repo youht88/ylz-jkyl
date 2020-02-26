@@ -1,0 +1,62 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  </head>
+<body>
+<script type="text/javascript" src="https:/res.wx.qq.com/open/js/jweixin-1.3.2.js"/>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@8.4.0/dist/mermaid.min.js"></script>
+<script>
+  var callback=function(node){
+    document.write(node)
+  }
+  mermaid.initialize({startOnLoad:true,securityLevel:"loose"});
+</script>
+
+Here is one mermaid diagram:
+<div class="mermaid">
+graph TD
+A[Client] --> B[Load Balancer]
+B --> C[Server1]
+B --> D[Server2]
+click A callback "Tooltip"
+click B callback "sample"
+click C callback "hello"
+</div>
+
+And here is another:
+<div class="mermaid">
+graph TD
+A[Client] -->|tcp_123| B(Load Balancer)
+B -->|tcp_456| C[Server1]
+B -->|tcp_456| D[Server2]
+</div>
+And the last graph:
+<div class="mermaid">
+graph TB
+    sq[Square shape] --> ci((Circle shape))
+    subgraph A subgraph
+        di{Diamond with  line break} -.-> ro(Rounded)
+        di==>ro2(Rounded square shape)
+    end
+    e --> od3>Really long text with linebreakin an Odd shape]
+    cyr[Cyrillic]-->cyr2((Circle shape 圆圈));
+    classDef green fill:#9f6,stroke:#333,stroke-width:2px;
+    classDef orange fill:#f96,stroke:#333,stroke-width:4px;
+    classDef default fill:#f96,stroke:#333,stroke-width:4px;
+    linkStyle 0,4 stroke:red,stroke-width:4px;
+    class sq,e green
+    class di orange
+</div>
+<div id="test">
+   <button id="btn">返回</button>
+</div>
+<script>
+  var obj=document.getElementById("btn")
+  obj.on("click")
+    wx.miniProgram.navigateTo({url:"/pages/index/index"})
+</script>
+</body>
+</html>

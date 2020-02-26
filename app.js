@@ -43,6 +43,8 @@ App({
         } else {
         	this.globalData.CustomBar = e.statusBarHeight + 50;
         }
+        this.globalData.Page=e.windowHeight - e.statusBarHeight - this.globalData.CustomBar
+        console.log(this.globalData)
       }
     })
   },

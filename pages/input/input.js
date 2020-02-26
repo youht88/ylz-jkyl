@@ -1,9 +1,26 @@
 const app = getApp();
 const _ = require('underscore')
 const SMcrypto = require("../../utils/smcrypto.js").SMcrypto
-const util = require("../../utils/util.js").util
-const record = require("../../utils/util.js").record
+const {util,Record} = require("../../utils/util.js")
+var record= new Record()
 var interval
+
+var option = {
+  title: {
+    text: 'ECharts 入门示例'
+  },
+  tooltip: {},
+  xAxis: {
+    data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
+  },
+  yAxis: {},
+  series: [{
+    name: '销量',
+    type: 'bar',
+    data: [5, 20, 36, 10, 10, 20]
+  }]
+};
+
 Page({
   data: {
     value:"",
@@ -12,6 +29,7 @@ Page({
     items: [],
     scrolltop:0,
     color:"blue",
+    currIdx:0
   },
   ////////生命周期函数////////////
   _nextQuestion(msg){
@@ -109,10 +127,19 @@ Page({
   _add(msg,type){
     this.data.items.push({msg:msg,type:type,dateTime:(new Date()).toISOString()})
     let value = this.data.value
-    console.log("scrolltop:",this.data.items.length*400)
+    console.log("currIdx:",this.data.items.length-1)
     this.setData({value:"",items:this.data.items,
-               scrolltop:this.data.items.length*400})
+               currIdx:this.data.items.length-1})
     if (!value) return
+    if (value=="图表"){
+      console.log("okok")
+      this.data.items.push({ msg:"I am echart",type:"chart",option:option,dateTime:(new Date()).toISOString()})
+      this.setData({
+        items: this.data.items,
+        "currIdx": this.data.items.length-1
+      })
+      return 
+    }
     util.request({
        url:`http://web1.imac1.youht.cc:8084/health/parse/${value}`
      }).then((res)=>{
@@ -128,10 +155,88 @@ Page({
           //this.data.items.push({msg:res.data.eDate+"-"+res.data.eTime,type:"AI",dateTime:(new Date()).toISOString()})
         }
         this.setData({items:this.data.items,
-              "scrolltop":this.data.items.length*400
+              "currIdx":this.data.items.length-1
         })
      }).catch((error)=>{
        console.log(error)
      })
+  },
+  _onCameraTap(){
+    if (!this.data.isCamera){
+      this.setData({isCamera:true})
+    }
+  },
+  _takePhoto(){
+    util.takePhoto().then((res)=>{
+      if (res){
+        this.data.items.push({ msg: "正在存入ipfs网络...", type: "photo", src: res.tempImagePath, dateTime: (new Date()).toISOString() })
+        this.setData({
+          items: this.data.items,
+          "currIdx": this.data.items.length-1
+        }) 
+        //上传到服务器
+        var pg = this.selectComponent("#progress")
+        console.log("uploadFile start:",pg)
+        util.uploadFile({
+           url:"http://web1.imac1.youht.cc:8084/img/upload",
+           filePath:res.tempImagePath,
+           name:"img",
+        }, pg, "loading").then((res1)=>{
+            var hash = JSON.parse(res1.data).hash
+            console.log("uploadFile end:",res1.data)
+            this.data.items[this.data.items.length - 1].msg=hash
+            this.setData({
+              items:this.data.items
+            })
+        }).catch((err)=>{
+            console.log("uploadFile end:",err)
+        })
+      }
+      this.setData({isCamera:false})
+    })
+  },
+  _onQrcodeTap(){
+    console.log("start qrcode")
+    util.scanCode().then((res)=>{
+      console.log(res)
+    }).catch((e)=>{
+      console.log(e)
+    })
+  },
+
+  _onTest(){
+    // util.setStorage("abc",{a:new Date(),b:"xyz",c:[1,2,3],d:true})
+    //    .then((res)=>{
+    //      console.log("setStorage complete!")
+    //    })
+     util.getStorage("abc")
+       .then((res)=>{
+         console.log("getStorage:",res)
+       }).catch((err)=>{
+         console.log("getStorage:",err)
+       })
+    util.removeStorage("abc").then((res)=>console.log(res))
+    this.setData({isHelp:true})
+    util.speech({ content: "0101，我是007，听到请回答！" })
+      .then((res)=>{
+        console.log("get voice...",res)
+        var pg = this.selectComponent("#progress")
+        util.downloadFile({
+          url:res.filename
+        },pg,"loading").then((res1)=>{
+          console.log("playVoice...", res1)
+          this.setData({audioFile:res1.tempFilePath})
+          console.log(this.data.audioFile)
+          wx.playVoice({
+            filePath:encodeURI(res1.tempFilePath),
+            success:((res)=>{
+              console.log("success",res)
+            }),
+            fail:((res)=>{
+              console.log("fail:",res)
+            })
+          })
+        })
+      })
   }
 })

@@ -1,0 +1,43 @@
+<view>
+  <view wx:if="{{type=='single'}}" class="cu-form-group margin-top">
+    <view class="title">{{title}}</view>
+    <picker bindchange="PickerChange" value="{{index}}" range="{{picker}}">
+      <view class="picker">
+        {{index?picker[index]:''}}
+      </view>
+    </picker>
+  </view>
+  <view wx:elif="{{type=='multi'}}" class="cu-form-group">
+    <view class="title">{{title}}</view>
+    <picker mode="multiSelector" bindchange="MultiChange" bindcolumnchange="MultiColumnChange" value="{{multiIndex}}"
+    range="{{multiArray}}">
+      <view class="picker">
+        {{multiArray[0][multiIndex[0]]}}，{{multiArray[1][multiIndex[1]]}}，{{multiArray[2][multiIndex[2]]}}
+      </view>
+    </picker>
+  </view>
+  <view wx:elif="{{type=='time'}}" class="cu-form-group">
+  <view class="title">{{title}}</view>
+    <picker mode="time" value="{{time}}" start="09:01" end="21:01" bindchange="TimeChange">
+      <view class="picker">
+        {{time}}
+      </view>
+    </picker>
+  </view>
+  <view wx:elif="{{type=='date'}}" class="cu-form-group">
+    <view class="title">{{title}}</view>
+    <picker mode="date" value="{{date}}" start="2015-09-01" end="2020-09-01" bindchange="DateChange">
+      <view class="picker">
+        {{date}}
+      </view>
+    </picker>
+  </view>
+  <view wx:elif="{{type=='region'}}" class="cu-form-group">
+    <view class="title">{{title}}</view>
+    <picker mode="region" bindchange="RegionChange" value="{{region}}" custom-item="{{customItem}}">
+      <view class="picker">
+        {{region[0]}}，{{region[1]}}，{{region[2]}}
+      </view>
+    </picker>
+  </view>
+</view>

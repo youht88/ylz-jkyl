@@ -47,6 +47,9 @@ App({
         console.log(this.globalData)
       }
     })
+    //设置程序属性
+    //this.globalData.baseURL="http://web1.imac1.youht.cc:8084"
+    this.globalData.baseURL = "http://192.168.31.119:6001"
   },
   globalData: {
     userInfo: null

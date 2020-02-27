@@ -140,8 +140,10 @@ Page({
       })
       return 
     }
+    var url = `${app.globalData.baseURL}/health/parse/${value}`
+    console.log("url:",url)
     util.request({
-       url:`http://web1.imac1.youht.cc:8084/health/parse/${value}`
+       url:url
      }).then((res)=>{
         console.log("result:",res.data)
         if (JSON.stringify(res.data)=="{}"){
@@ -178,7 +180,7 @@ Page({
         var pg = this.selectComponent("#progress")
         console.log("uploadFile start:",pg)
         util.uploadFile({
-           url:"http://web1.imac1.youht.cc:8084/img/upload",
+           url:`${app.globalData.baseURL}/img/upload`,
            filePath:res.tempImagePath,
            name:"img",
         }, pg, "loading").then((res1)=>{

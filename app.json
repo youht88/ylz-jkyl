@@ -5,7 +5,9 @@
     "pages/audio/audio",
     "pages/chart/chart",
     "pages/config/config",
-    "pages/timeline/timeline"
+    "pages/timeline/timeline",
+    "pages/mark/mark",
+    "pages/help/help"
   ],
   "window": {
     "backgroundTextStyle": "light",

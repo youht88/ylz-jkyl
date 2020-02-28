@@ -17,6 +17,39 @@ class Util{
 
     return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':')
   }
+  //交互
+  showToast(title,icon){
+    wx.showToast({title,icon})
+  }
+  showModal(title,content){
+    return new Promise((resolve,reject)=>{
+      wx.showModal({
+        title:title,
+        content:content,
+        success:(res)=>{
+          if (res.confirm){
+            resolve(true)
+          }else{
+            resolve(false)
+          }
+        },
+        fail:reject
+      })
+    })
+  }
+  showActionSheet(itemList){
+    return new Promise((resolve,reject)=>{
+      wx.showActionSheet({
+        itemList: itemList,
+        success: (res)=>{
+          resolve(res.tapIndex)
+        },
+        fail:(res)=>{
+          reject(res.errMsg)
+        }
+      })
+    })
+  }
   //扫描条形码或二维码
   scanCode(onlyFromCamera=false){
     return new Promise((resolve,reject)=>{

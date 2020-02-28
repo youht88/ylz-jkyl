@@ -76,6 +76,13 @@
 					"id": -1,
 					"name": "pages/input/input",
 					"pathName": "pages/input/input",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "pages/help/help",
+					"pathName": "pages/help/help",
 					"scene": null
 				}
 			]

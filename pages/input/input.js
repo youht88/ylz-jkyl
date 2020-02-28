@@ -26,6 +26,7 @@ Page({
     value:"",
     InputBottom:0,
     CustomBar: app.globalData.CustomBar,
+    Page: app.globalData.Page,
     items: [],
     scrolltop:0,
     color:"blue",
@@ -41,6 +42,10 @@ Page({
   onUnload() {
     console.log("onUnload")
     clearInterval(interval)
+
+    util.setStorage("DATA",this.data.items).then(res=>{
+      console.log(res)
+    })
   },
   onShow1(){
     this._add("重新定位","location")
@@ -68,6 +73,16 @@ Page({
     },2000)
   },
   onLoad(){
+    this._registerRecord()
+    this._loadData()
+  },
+  _loadData(){
+    util.getStorage("DATA").then(res=>{
+      console.log("loadData:",res)
+      this.setData({items:res})
+    })
+  },
+  _registerRecord(){
     let cbRecognize = (res) => {
       let text = res.result
       console.log("识别中的文字：", text)
@@ -103,7 +118,11 @@ Page({
     this.setData({ value ,
       InputBottom: 0
     })
-    this._add(value,"self")
+    if (!value){
+      this._add("[没有检测到你的发言]","info")
+    }else{
+     this._add(value,"self")
+    }
   },
   _onTouchStart(){
     clearInterval(interval)
@@ -123,14 +142,19 @@ Page({
     console.log("voice end")
     record.stopRec()
     this.setData({color:"blue"})
-  },  
+  }, 
+
   _add(msg,type){
     this.data.items.push({msg:msg,type:type,dateTime:(new Date()).toISOString()})
     let value = this.data.value
+    this.setData({ value: "",
+                   //items:this.data.items,
+                   "currIdx":this.data.items.length - 1})
     console.log("currIdx:",this.data.items.length-1)
-    this.setData({value:"",items:this.data.items,
-               currIdx:this.data.items.length-1})
-    if (!value) return
+    if (!value){
+      this.setData({items:this.data.items})
+      return
+    }
     if (value=="图表"){
       console.log("okok")
       this.data.items.push({ msg:"I am echart",type:"chart",option:option,dateTime:(new Date()).toISOString()})
@@ -147,7 +171,7 @@ Page({
      }).then((res)=>{
         console.log("result:",res.data)
         if (JSON.stringify(res.data)=="{}"){
-          this.data.items.push({ msg: "抱歉，我没能get到您的意思", type: "info" })
+          this.data.items.push({ msg: "抱歉，我没有理解这句话。愿意帮我标记一下吗？我会努力学习的！", type: "info",text:value})
         }else{
           Object.keys(res.data).map(x=>{
             res.data[x].map(y=>{
@@ -201,6 +225,7 @@ Page({
     console.log("start qrcode")
     util.scanCode().then((res)=>{
       console.log(res)
+      this._add("识别码:"+res.result,"info")
     }).catch((e)=>{
       console.log(e)
     })
@@ -217,7 +242,16 @@ Page({
        }).catch((err)=>{
          console.log("getStorage:",err)
        })
-    util.removeStorage("abc").then((res)=>console.log(res))
+    util.removeStorage("abc").then((res)=>{
+      util.showModal("提示",JSON.stringify(res)).then((res)=>{
+        util.showToast("是否确认"+res)
+        util.showActionSheet(["a", "b", "c"])
+          .then(res => {
+            console.log(res)
+            util.showToast(res, "error")
+          }).catch(e => console.log(e))
+      })
+    })
     this.setData({isHelp:true})
     util.speech({ content: "0101，我是007，听到请回答！" })
       .then((res)=>{
@@ -240,5 +274,18 @@ Page({
           })
         })
       })
+  },
+  _onMark(e){
+    console.log(e)
+    var text=e.target.dataset.text
+    if (!text) return
+    wx.navigateTo({
+      url:`/pages/mark/mark?text=${e.target.dataset.text}`
+    })
+  },
+  _onHelp(e){
+    wx.navigateTo({
+      url: `/pages/help/help`
+    })
   }
 })

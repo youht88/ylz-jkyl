@@ -1,10 +1,13 @@
 <cu-custom bgColor="bg-gradual-red" isBack="{{true}}"><view slot="backText">返回</view><view slot="content">记录健康数据</view></cu-custom>
-<ylz-progress id="progress" show="false" color="green" striped="true" active="true" value="0"/>
 <!--<audio id="audio1" src="{{audioFile}}" controls></audio>-->
-<scroll-view scroll-y scroll-into-view="item{{currIdx}}" scroll-with-animation>
+<ylz-progress id="progress" show="false" color="green" striped="false" active="true" value="0" style="position:fixed;top:{{CustomBar-10}}px;width:100%;z-index:3"/>
+
+
+<view class="flex flex-director ">
+<scroll-view scroll-y scroll-into-view="item{{currIdx}}" scroll-with-animation style="height:{{Page-30}}px">
 <block wx:for="{{items}}" wx:key="index">
   <saying wx:if="{{item.type=='self'}}" id="item{{index}}" item="{{item}}"/>
-  <info   wx:elif="{{item.type=='info'}}" id="item{{index}}" item="{{item}}"/>
+  <info   wx:elif="{{item.type=='info'}}" id="item{{index}}" item="{{item}}" bind:tap="_onMark" data-text="{{item.text}}"/>
   <eat    wx:elif="{{item.type=='eat'}}" id="item{{index}}" item="{{item}}"/>
   <sign   wx:elif="{{item.type=='sign_weightKg'}}" id="item{{index}}" item="{{item}}"/> 
   <sport   wx:elif="{{item.type=='sport_steps'}}" id="item{{index}}" item="{{item}}"/> 
@@ -16,43 +19,56 @@
 
 </scroll-view>
 
-<view class="cu-bar foot input {{InputBottom!=0?'cur':''}}" style="bottom:{{InputBottom}}px">
+<view class="cu-bar foot input margin-bottom {{InputBottom!=0?'cur':''}}" style="bottom:{{InputBottom}}px">
   <input class="solid-bottom" 
          bind:focus="_onFocus"
          bind:blur="_onBlur"
          adjust-position="{{false}}" focus="{{false}}" maxlength="300" cursor-spacing="10" placeholder="录入您的健康数据" value="{{value}}"></input>
-  
  </view>
+</view>
+
+
 <!--tool bar !-->
-<view class="flex flex-direction margin-xs justify-between" style="position:fixed;bottom:100rpx;right:60rpx;width:100rpx;height:600rpx">
-  <view class="bg-green shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
-          bind:tap="_onQrcodeTap">
-    <text class="cuIcon-qrcode"></text>
-  </view>
-  <view class="bg-mauve shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx" 
-          bind:tap="_onCameraTap">
-    <text class="cuIcon-camera"></text>
-  </view>
+<!--<view class="flex flex-direction margin-xs justify-between" style="position:fixed;bottom:140rpx;right:30rpx;width:100rpx">
+-->
+<scroll-view scroll-y style="position:fixed;bottom:150rpx;right:30rpx;width:100rpx;height:200rpx">
   <view class="bg-{{color}} shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
           bind:touchstart="_onTouchStart"
           bind:touchend="_onTouchEnd" >
     <text class="cuIcon-voicefill"></text>
   </view>
-  <view class="bg-orange shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
+  <view class="bg-green shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx"
+          bind:tap="_onQrcodeTap">
+    <text class="cuIcon-qrcode"></text>
+  </view>
+  <view class="bg-mauve shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx" 
+          bind:tap="_onCameraTap">
+    <text class="cuIcon-camera"></text>
+  </view>
+  <view class="bg-orange shadow text-xxl margin-top text-center round flex align-center justify-center" style="height:100rpx"
           bind:tap="_onTest" >
     <text class="cuIcon-link"></text>
   </view>
-   <view class="action bg-yellow shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
+  <view class="action bg-yellow shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx"
           bind:tap="_onClear" >
     <text class="cuIcon-refresh"></text>
   </view>
-</view>
+  <view class="action bg-brown shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx"
+          bind:tap="_onHelp"
+          bind:helpCommand = "_onHelpCommand" >
+    <text class="cuIcon-question"></text>
+  </view>
+</scroll-view>
+<!--</view>-->
 
 <view wx:if="{{isCamera}}" class="flex flex-direction align-center"
-      style="position:fixed;top:100rpx;width:100%">
-  <camera device-position="back" flash="off" style="height:800rpx;width:90%"
-    binderror="error" ></camera>
-  <button class="margin" type="primary" bindtap="_takePhoto">拍照</button>
+      style="position:fixed;top:{{CustomBar}}px;height:50%;width:100%">
+  <camera device-position="back" flash="off"
+    binderror="error" style="flex-grow:1" ></camera>
+  <view class="action text-xsl text-center round ">
+  <text class="cuIcon-radioboxfill text-red margin" bindtap="_takePhoto" style="z-index=10"></text>
+  </view>
 </view>
+
 
 <!--<web-view wx:if="{{isHelp}}" src="{{'/assets/html/help.html'}}"/> -->

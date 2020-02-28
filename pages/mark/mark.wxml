@@ -1,0 +1,4 @@
+<cu-custom bgColor="bg-gradual-yellow" isBack="{{true}}"><view slot="backText">返回</view><view slot="content">标记我的语言</view></cu-custom>
+<view >
+<text class="margin padding text-blue text-xxl">{{text}}</text>
+</view>

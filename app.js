@@ -50,6 +50,8 @@ App({
     //设置程序属性
     //this.globalData.baseURL="http://web1.imac1.youht.cc:8084"
     this.globalData.baseURL = "http://192.168.31.119:6001"
+    this.globalData.IconAI ="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1582900534631&di=a023f2a2434f880a4dc6e49997f2f0db&imgtype=0&src=http%3A%2F%2Fg.hiphotos.baidu.com%2Fzhidao%2Fwh%253D450%252C600%2Fsign%3D952742d3a01ea8d38a777c00a23a1c78%2F0dd7912397dda1440be999dab4b7d0a20df486f2.jpg"
+    this.globalData.IconSelf=""
   },
   globalData: {
     userInfo: null

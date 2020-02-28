@@ -72,6 +72,43 @@ class Util{
       })
     }) 
   }
+  //file
+  readFile(option){
+    return new Promise((resolve,reject)=>{
+      wx.getFileSystemManager().readFile(
+        {
+          filePath:option.filePath,
+          encoding: option.encoding, //ascii,base64,binary,utf-8
+          success:resolve,
+          fail:reject
+        }
+      )       
+    })    
+  }
+  writeFile(option) {
+    return new Promise((resolve, reject) => {
+      wx.FileSystemManager().writeFile(
+        {
+          filePath: option.filePath,
+          data    : option.data,
+          encoding: option.encoding,  //ascii,base64,binary,utf-8
+          success: resolve,
+          fail: reject
+        }
+      )
+    })
+  }
+  rmFile(option) {
+    return new Promise((resolve, reject) => {
+      wx.FileSystemManager().unlinkFile(
+        {
+          filePath: option.filePath,
+          success: resolve,
+          fail: reject
+        }
+      )
+    })
+  }
   //storage
   setStorage(key,value) {
     return new Promise((resolve, reject) => {
@@ -135,6 +172,7 @@ class Util{
       wx.request({
         url: option.url,
         method: option.method,
+        header: option.header,
         data: option.data || {},
         success: resolve,
         fail: reject

@@ -1,4 +1,5 @@
-console.log("photo")
+const app=getApp()
+
 Component({
   options: {
     addGlobalClass: true,
@@ -10,5 +11,6 @@ Component({
     }
   },
   data: {
+    IconAI: app.globalData.IconAI
   },
 })

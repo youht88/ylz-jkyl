@@ -43,7 +43,7 @@ Page({
     console.log("onUnload")
     clearInterval(interval)
 
-    util.setStorage("DATA",this.data.items).then(res=>{
+    util.setStorage("ITEMS",this.data.items).then(res=>{
       console.log(res)
     })
   },
@@ -77,7 +77,7 @@ Page({
     this._loadData()
   },
   _loadData(){
-    util.getStorage("DATA").then(res=>{
+    util.getStorage("ITEMS").then(res=>{
       console.log("loadData:",res)
       this.setData({items:res})
     })
@@ -145,21 +145,24 @@ Page({
   }, 
 
   _add(msg,type){
-    this.data.items.push({msg:msg,type:type,dateTime:(new Date()).toISOString()})
+    this.data.items.push()
     let value = this.data.value
-    this.setData({ value: "",
-                   //items:this.data.items,
-                   "currIdx":this.data.items.length - 1})
-    console.log("currIdx:",this.data.items.length-1)
+    let temp
+    this.data.items.push({ msg: msg, type: type, dateTime: (new Date()).toISOString()})
+    this.setData({ value: ""})
     if (!value){
-      this.setData({items:this.data.items})
+      this.setData({
+        items:this.data.items,
+        "currIdx": this.data.items.length - 1
+      })  
       return
     }
     if (value=="图表"){
       console.log("okok")
       this.data.items.push({ msg:"I am echart",type:"chart",option:option,dateTime:(new Date()).toISOString()})
+      temp = "items[" + (this.data.items.length - 1) + "]"
       this.setData({
-        items: this.data.items,
+        [temp]: this.data.items[this.data.items.length - 1],
         "currIdx": this.data.items.length-1
       })
       return 
@@ -180,9 +183,10 @@ Page({
           })
           //this.data.items.push({msg:res.data.eDate+"-"+res.data.eTime,type:"AI",dateTime:(new Date()).toISOString()})
         }
-        this.setData({items:this.data.items,
-              "currIdx":this.data.items.length-1
-        })
+       this.setData({
+         items: this.data.items,
+         "currIdx": this.data.items.length - 1
+       })  
      }).catch((error)=>{
        console.log(error)
      })
@@ -210,9 +214,29 @@ Page({
         }, pg, "loading").then((res1)=>{
             var hash = JSON.parse(res1.data).hash
             console.log("uploadFile end:",res1.data)
-            this.data.items[this.data.items.length - 1].msg=hash
             this.setData({
-              items:this.data.items
+              ["items["+(this.data.items.length - 1)+"].msg"]:hash
+            })
+            //识别这张图片，待开发
+            util.readFile({
+               filePath:res.tempImagePath,
+               encoding:"base64"
+            }).then((res2)=>{
+              console.log("res2",res2)
+              util.request({
+                url: "https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general?access_token=24.a17d67af3872c1938ede5b73021f0e2e.2592000.1583635267.282335-18405725",
+                method: "post",
+                header: { "content-type": "application/x-www-form-urlencoded" },
+                data: {
+                  image: res2.data,
+                  baike_num: 0
+                }
+              }).then((res3) => {
+                console.log(res3)
+                this.setData({
+                  ["items[" + (this.data.items.length - 1) + "].what"]: res3.data.result[0]
+                })
+              })
             })
         }).catch((err)=>{
             console.log("uploadFile end:",err)
@@ -232,16 +256,17 @@ Page({
   },
 
   _onTest(){
-    // util.setStorage("abc",{a:new Date(),b:"xyz",c:[1,2,3],d:true})
-    //    .then((res)=>{
-    //      console.log("setStorage complete!")
-    //    })
+    /* util.setStorage("abc",{a:new Date(),b:"xyz",c:[1,2,3],d:true})
+        .then((res)=>{
+          console.log("setStorage complete!")
+        })
      util.getStorage("abc")
        .then((res)=>{
          console.log("getStorage:",res)
        }).catch((err)=>{
          console.log("getStorage:",err)
        })
+    */
     util.removeStorage("abc").then((res)=>{
       util.showModal("提示",JSON.stringify(res)).then((res)=>{
         util.showToast("是否确认"+res)

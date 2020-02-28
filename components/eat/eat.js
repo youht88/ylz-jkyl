@@ -1,3 +1,5 @@
+const app=getApp()
+
 Component({
   options: {
     addGlobalClass: true,
@@ -8,4 +10,7 @@ Component({
       type: Object
     }
   },
+  data:{
+    IconAI:app.globalData.IconAI
+  }
 })

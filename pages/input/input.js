@@ -79,7 +79,10 @@ Page({
   _loadData(){
     util.getStorage("ITEMS").then(res=>{
       console.log("loadData:",res)
-      this.setData({items:res})
+      this.setData({
+        items:res,
+        currIdx:res.length - 1
+      })
     })
   },
   _registerRecord(){
@@ -146,7 +149,7 @@ Page({
 
   _add(msg,type){
     this.data.items.push()
-    let value = this.data.value
+    let value = msg
     let temp
     this.data.items.push({ msg: msg, type: type, dateTime: (new Date()).toISOString()})
     this.setData({ value: ""})

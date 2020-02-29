@@ -11,6 +11,6 @@ Component({
     }
   },
   data: {
-    IconAI: app.globalData.IconAI
+    IconAI: app.globalData.IconAnimal
   },
 })

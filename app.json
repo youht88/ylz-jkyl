@@ -33,5 +33,9 @@
     "scope.record": {
       "desc": "录音功能听取你的语音并转换成文字"
     }
-  }
+  },
+  "navigateToMiniProgramAppIdList": [
+    "wxb779d92e3d92b8a9",
+    "wxdc03b02a8c326536"
+  ]  
 }

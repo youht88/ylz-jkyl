@@ -5,12 +5,12 @@
 
 <form>
 	<view class="cu-form-group margin-top">
-		<view class="title">邮件</view>
-		<input placeholder="两字短标题"></input>
+		<view class="title">Ad</view>
+		<text class="text-xs text-green text-cut">{{address}}</text>
 	</view>
 	<view class="cu-form-group">
-		<view class="title">输入框</view>
-		<input placeholder="三字标题"></input>
+		<view class="title">助记串</view>
+		<input placeholder="输入自己不会忘记的字符串"></input>
 	</view>
 	<view class="cu-form-group">
 		<view class="title">收货地址</view>
@@ -22,9 +22,9 @@
 		<text class="cuIcon-locationfill text-orange"></text>
 	</view>
 	<view class="cu-form-group">
-		<view class="title">验证码</view>
+		<view class="title" >验证码</view>
 		<input placeholder="输入框带个按钮"></input>
-		<button class="cu-btn bg-green shadow">验证码</button>
+		<button class="cu-btn bg-green shadow" bind:tap="_onTest">验证码</button>
 	</view>
 	<view class="cu-form-group">
 		<view class="title">手机号码</view>

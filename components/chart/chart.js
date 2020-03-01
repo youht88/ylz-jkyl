@@ -5,9 +5,8 @@ Component({
     multipleSlots: true
   },
   properties: {
-    item: {
-      type: Object
-    }
+    item: {type: Object},
+    index:{type: Number}
   },
   data: {
     ec:{
@@ -16,19 +15,19 @@ Component({
   },
   lifetimes:{
     ready:function(){
-      this.echartComponent = this.selectComponent("#echart1")
+      this.echartComponent = this.selectComponent("#echart"+this.data.index)
       this.initChart()
     }
   },
   methods:{
    initChart:function(){
      this.echartComponent.init((canvas, width, height)=>{
-      console.log("hello I am here!")
       const chart = echarts.init(canvas, null, {
           width: width,
           height: height
       });
-      chart.setOption(this.data.item.option);
+      console.log("setoption:",this.data.item.option)
+      chart.setOption(this.data.item.option,true,true);
       return chart;
     })
    }

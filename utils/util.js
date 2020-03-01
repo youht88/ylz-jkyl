@@ -72,6 +72,17 @@ class Util{
       })
     }) 
   }
+  chooseImage(isCompressed){
+    return new Promise((resolve,reject)=>{
+      wx.chooseImage({
+        count: 1,
+        sizeType: isCompressed?['compressed']:['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success:resolve,
+        fail:reject
+      })
+    })
+  }
   //file
   readFile(option){
     return new Promise((resolve,reject)=>{

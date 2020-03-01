@@ -1,5 +1,6 @@
 <view id="item{{index}}" class="cu-chat">
-    <view class="cu-info round">
+    <view class="cu-info round flex">
+      <view wx:if="{{imgHash}}" class="cu-avatar round lg" style="background-image:url({{baseURL}}/img/download/{{imgHash}});"></view>
        {{item.msg}}
     </view>
 </view>

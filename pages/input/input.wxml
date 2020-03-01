@@ -1,26 +1,30 @@
 <cu-custom bgColor="bg-gradual-red" isBack="{{true}}"><view slot="backText">返回</view><view slot="content">记录健康数据</view></cu-custom>
 <!--<audio id="audio1" src="{{audioFile}}" controls></audio>-->
-<ylz-progress id="progress" show="false" color="green" striped="false" active="true" value="0" style="position:fixed;top:{{CustomBar-10}}px;width:100%;z-index:3"/>
+<ylz-progress id="progress" show="false" color="green" striped="false" active="true" value="0" style="position:fixed;top:{{CustomBar-10}}px;width:100%;z-index:400"/>
 
 
 <view class="flex flex-director ">
-<scroll-view scroll-y scroll-into-view="item{{currIdx}}" scroll-with-animation style="height:{{Page-30}}px">
+<scroll-view scroll-y scroll-into-view="item{{currIdx}}" scroll-with-animation style="height:{{Page-30}}px;z-index:100">
 <block wx:for="{{items}}" wx:key="index">
   <saying wx:if="{{item.type=='self'}}" id="item{{index}}" item="{{item}}"/>
-  <info   wx:elif="{{item.type=='info'}}" id="item{{index}}" item="{{item}}" bind:tap="_onMark" data-text="{{item.text}}"/>
-  <eat    wx:elif="{{item.type=='eat'}}" id="item{{index}}" item="{{item}}"/>
+  <info   wx:elif="{{item.type=='info'}}" id="item{{index}}" item="{{item}}" bind:tap="_onMark" data-text="{{item.text}}" imgHash="{{item.imgHash}}">
+  </info>
+  <eat    wx:elif="{{item.type=='eat'}}" id="item{{index}}" item="{{item}}"
+          data-index="{{index}}"
+          bind:tap="_onHandleEat"
+  />
   <sign   wx:elif="{{item.type=='sign_weightKg'}}" id="item{{index}}" item="{{item}}"/> 
   <sport   wx:elif="{{item.type=='sport_steps'}}" id="item{{index}}" item="{{item}}"/> 
   <behavior   wx:elif="{{item.type=='behavior_sleep'}}" id="item{{index}}" item="{{item}}"/> 
   <location   wx:elif="{{item.type=='location'}}" id="item{{index}}" item="{{item}}"/> 
-  <chart   wx:elif="{{item.type=='chart'}}" id="item{{index}}" item="{{item}}"/> 
+  <chart   wx:elif="{{item.type=='chart'}}" id="item{{index}}" item="{{item}}" index="{{index}}"/> 
   <photo   wx:elif="{{item.type=='photo'}}" id="item{{index}}" item="{{item}}"/> 
 </block>
 
 </scroll-view>
 
-<view class="cu-bar foot input margin-bottom {{InputBottom!=0?'cur':''}}" style="bottom:{{InputBottom}}px">
-  <input class="solid-bottom" 
+<view class="cu-bar foot input margin-bottom {{InputBottom!=0?'cur':''}}" style="bottom:{{InputBottom}}px;z-index:200;opacity:1">
+  <input class="solid-bottom action" 
          bind:focus="_onFocus"
          bind:blur="_onBlur"
          adjust-position="{{false}}" focus="{{false}}" maxlength="300" cursor-spacing="10" placeholder="录入您的健康数据" value="{{value}}"></input>
@@ -31,7 +35,7 @@
 <!--tool bar !-->
 <!--<view class="flex flex-direction margin-xs justify-between" style="position:fixed;bottom:140rpx;right:30rpx;width:100rpx">
 -->
-<scroll-view scroll-y style="position:fixed;bottom:150rpx;right:30rpx;width:100rpx;height:400rpx">
+<scroll-view scroll-y style="position:fixed;bottom:150rpx;right:30rpx;width:100rpx;height:400rpx;z-index:300;opacity:1">
   <view class="bg-{{color}} shadow text-xxl text-center round flex align-center justify-center" style="height:100rpx"
           bind:touchstart="_onTouchStart"
           bind:touchend="_onTouchEnd" >
@@ -42,7 +46,8 @@
     <text class="cuIcon-qrcode"></text>
   </view>
   <view class="bg-mauve shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx" 
-          bind:tap="_onCameraTap">
+          bind:tap ="_takePhoto"
+          bind:tap1="_onCameraTap">
     <text class="cuIcon-camera"></text>
   </view>
   <view class="bg-orange shadow text-xxl margin-top text-center round flex align-center justify-center" style="height:100rpx"
@@ -62,7 +67,7 @@
 <!--</view>-->
 
 <view wx:if="{{isCamera}}" class="flex flex-direction align-center"
-      style="position:fixed;top:{{CustomBar}}px;height:50%;width:100%">
+      style="position:fixed;top:{{CustomBar}}px;height:50%;width:100%;z-index:400">
   <camera device-position="back" flash="off"
     binderror="error" style="flex-grow:1" ></camera>
   <view class="action text-xsl text-center round ">

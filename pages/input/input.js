@@ -5,22 +5,6 @@ const {util,Record} = require("../../utils/util.js")
 var record= new Record()
 var interval
 
-var option = {
-  title: {
-    text: 'ECharts 入门示例'
-  },
-  tooltip: {},
-  xAxis: {
-    data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
-  },
-  yAxis: {},
-  series: [{
-    name: '销量',
-    type: 'bar',
-    data: [5, 20, 36, 10, 10, 20]
-  }]
-};
-
 Page({
   data: {
     value:"",
@@ -34,7 +18,7 @@ Page({
   },
   ////////生命周期函数////////////
   _nextQuestion(msg){
-    this._add(msg,"info")
+    this._add({msg},"info")
     util.speech({ content:msg}).then((res) => {
       console.log("are you hear??")
     })
@@ -48,7 +32,7 @@ Page({
     })
   },
   onShow1(){
-    this._add("重新定位","location")
+    this._add({msg:"重新定位"},"location")
     var question1 = ["记录点什么？","有什么可以记录的？"]
     var question2 = ["还有吗？","记录点其他的？","再记录些？","再来一条！"]
     var answerEnd=["可以了","没有了","不用了","就这样","行了"]
@@ -83,6 +67,18 @@ Page({
         items:res,
         currIdx:res.length - 1
       })
+      var data = this.data.items.map(x => {
+        switch (x.type) {
+          case "eat": return {"eat":x.msg}
+          case "sign_weightKg": return { key:"sign_weightKg",value:x.msg}
+          case "emotion": return { key:"emotion", value:x.msg }
+          case "behavior": return { key:"behavior",value:x.msg }
+          case "sport": return { key:"sport",value:x.msg }
+          default: return null
+        }
+      }).filter(x=>x)
+      console.log("data:", data)
+      this.setData({data:data})
     })
   },
   _registerRecord(){
@@ -103,7 +99,7 @@ Page({
         type="self"
       }
       console.log("识别出来的文字:", text)
-      this._add(text,type)
+      this._add({msg:text},type)
     }
     record.init(cbRecognize, cbStop)
   },
@@ -122,16 +118,18 @@ Page({
       InputBottom: 0
     })
     if (!value){
-      this._add("[没有检测到你的发言]","info")
+      this._add({msg:"[没有检测到你的发言]"},"info")
     }else{
-     this._add(value,"self")
+     this._add({msg:value},"self")
     }
   },
-  _onTouchStart(){
+  _onTouchStart(e){
     clearInterval(interval)
+    console.log("touchstart:",e)
     this._onVoiceStart()
   },
-  _onTouchEnd(){
+  _onTouchEnd(e){
+    console.log("touchend:",e)
     this._onVoiceEnd()
   },
   //zh_CN,en_US,zh_HK,sichuanghua
@@ -147,29 +145,20 @@ Page({
     this.setData({color:"blue"})
   }, 
 
-  _add(msg,type){
+  _add(obj,type){
     this.data.items.push()
-    let value = msg
+    let value = obj.msg
     let temp
-    this.data.items.push({ msg: msg, type: type, dateTime: (new Date()).toISOString()})
+    this.data.items.push({ msg: obj.msg, imgHash:obj.imgHash,type: type, dateTime: (new Date()).toISOString()})
     this.setData({ value: ""})
-    if (!value){
+    if (!value || type=="info"){
       this.setData({
         items:this.data.items,
         "currIdx": this.data.items.length - 1
       })  
       return
     }
-    if (value=="图表"){
-      console.log("okok")
-      this.data.items.push({ msg:"I am echart",type:"chart",option:option,dateTime:(new Date()).toISOString()})
-      temp = "items[" + (this.data.items.length - 1) + "]"
-      this.setData({
-        [temp]: this.data.items[this.data.items.length - 1],
-        "currIdx": this.data.items.length-1
-      })
-      return 
-    }
+    if (this._isGraph(value)) return
     var url = `${app.globalData.baseURL}/health/parse/${value}`
     console.log("url:",url)
     util.request({
@@ -178,18 +167,101 @@ Page({
         console.log("result:",res.data)
         if (JSON.stringify(res.data)=="{}"){
           this.data.items.push({ msg: "抱歉，我没有理解这句话。愿意帮我标记一下吗？我会努力学习的！", type: "info",text:value})
+          this.setData({
+            items: this.data.items,
+            "currIdx": this.data.items.length - 1
+          })  
         }else{
           Object.keys(res.data).map(x=>{
             res.data[x].map(y=>{
-              this.data.items.push({msg:y, type: x, dateTime: (new Date()).toISOString() })
+              //如果是饮食，需要精确定位
+              if (x=="eat"){
+                util.request({url:`${app.globalData.baseURL}/food/${y.stuff}`}).then((food)=>{
+                  if (food.data.length==0){
+                    console.log("no")
+                    this.data.items.push({ msg: y, type: x, dateTime: (new Date()).toISOString() })
+                    this.data.data.push({ key: x, value: y })
+                    this.setData({
+                      items: this.data.items,
+                      "currIdx": this.data.items.length - 1
+                    })  
+                  }else if (food.data.length==1){
+                    console.log("one", `${ food.data[0].split(":")[1] }`)
+                    util.request({
+                      url: `${app.globalData.baseURL}/food/${food.data[0].split(":")[1]}/${y.value}/${y.unit}`
+                    }).then(res2 => {
+                      console.log("one:",res2.data)
+                      this.data.items.push({ 
+                         msg: {
+                           stuff:res2.data.name,
+                           value:y.value,
+                           unit: y.unit,
+                           nutrition:res2.data.nutrition,
+                           imgHash:res2.data.imgHash,
+                           eDate:y.eDate,
+                           eTime:y.eTime
+                         }, type: x, dateTime: (new Date()).toISOString() })
+                      this.data.data.push({ key: x, value: {
+                        stuff: res2.data.name,
+                        value: y.value,
+                        unit: y.unit,
+                        nutrition: res2.data.nutrition,
+                        eDate: y.eDate,
+                        eTime: y.eTime
+                       }})
+                      this.setData({
+                        items: this.data.items,
+                        "currIdx": this.data.items.length - 1
+                      })  
+                    })
+                  }else{
+                    console.log("multi")
+                    util.showActionSheet(food.data).then(idx=>{
+                      util.request({
+                        url: `${app.globalData.baseURL}/food/${food.data[idx].split(":")[1]}/${y.value}/${y.unit}`})
+                         .then(res2=>{
+                          console.log("one:", res2.data)
+                          this.data.items.push({
+                            msg: {
+                              stuff: res2.data.name,
+                              value: y.value,
+                              unit: y.unit,
+                              nutrition: res2.data.nutrition,
+                              imgHash:res2.data.imgHash,
+                              eDate: y.eDate,
+                              eTime: y.eTime
+                            }, type: x, dateTime: (new Date()).toISOString()
+                          })
+                          this.data.data.push({
+                            key: x, value: {
+                              stuff: res2.data.name,
+                              value: y.value,
+                              unit: y.unit,
+                              nutrition: res2.data.nutrition,
+                              eDate: y.eDate,
+                              eTime: y.eTime
+                            }
+                          })
+                           this.setData({
+                             items: this.data.items,
+                             "currIdx": this.data.items.length - 1
+                           })  
+                      })
+                    })
+                  }
+                })
+              }else{
+                this.data.items.push({msg:y, type: x, dateTime: (new Date()).toISOString() })
+                this.data.data.push({key:x,value:y})
+                this.setData({
+                  items: this.data.items,
+                  "currIdx": this.data.items.length - 1
+                })  
+              }
             })
           })
-          //this.data.items.push({msg:res.data.eDate+"-"+res.data.eTime,type:"AI",dateTime:(new Date()).toISOString()})
+          console.log("data:",this.data.data)
         }
-       this.setData({
-         items: this.data.items,
-         "currIdx": this.data.items.length - 1
-       })  
      }).catch((error)=>{
        console.log(error)
      })
@@ -200,9 +272,11 @@ Page({
     }
   },
   _takePhoto(){
-    util.takePhoto().then((res)=>{
+    util.chooseImage(true).then((res)=>{
+      console.log(res)
+      var tempFilePath = res.tempFilePaths[0]
       if (res){
-        this.data.items.push({ msg: "正在存入ipfs网络...", type: "photo", src: res.tempImagePath, dateTime: (new Date()).toISOString() })
+        this.data.items.push({ msg: "正在存入ipfs网络...", type: "photo", src: tempFilePath, dateTime: (new Date()).toISOString() })
         this.setData({
           items: this.data.items,
           "currIdx": this.data.items.length-1
@@ -212,7 +286,7 @@ Page({
         console.log("uploadFile start:",pg)
         util.uploadFile({
            url:`${app.globalData.baseURL}/img/upload`,
-           filePath:res.tempImagePath,
+           filePath:tempFilePath,
            name:"img",
         }, pg, "loading").then((res1)=>{
             var hash = JSON.parse(res1.data).hash
@@ -220,9 +294,9 @@ Page({
             this.setData({
               ["items["+(this.data.items.length - 1)+"].msg"]:hash
             })
-            //识别这张图片，待开发
+            //识别这张图片
             util.readFile({
-               filePath:res.tempImagePath,
+               filePath:tempFilePath,
                encoding:"base64"
             }).then((res2)=>{
               console.log("res2",res2)
@@ -236,9 +310,12 @@ Page({
                 }
               }).then((res3) => {
                 console.log(res3)
+                util.showToast("success")
                 this.setData({
                   ["items[" + (this.data.items.length - 1) + "].what"]: res3.data.result[0]
                 })
+              }).catch((err)=>{
+                util.showModal("警告",JSON.stringify(err))
               })
             })
         }).catch((err)=>{
@@ -251,8 +328,15 @@ Page({
   _onQrcodeTap(){
     console.log("start qrcode")
     util.scanCode().then((res)=>{
-      console.log(res)
-      this._add("识别码:"+res.result,"info")
+      util.request({
+        url: `${app.globalData.baseURL}/food/id/${res.result}`
+      }).then((res1)=>{
+        if (res1.data){
+          this._add({imgHash:res1.data.imgHash,msg:res1.data.name}, "info")
+        }else{
+          this._add({msg:"未能识别"+res.result+",它是什么？"}, "info")
+        }
+      })
     }).catch((e)=>{
       console.log(e)
     })
@@ -315,5 +399,142 @@ Page({
     wx.navigateTo({
       url: `/pages/help/help`
     })
+  },
+
+  _isGraph(value){
+    var option
+    var temp
+    if (value.match("体重情况")) {
+      option = this._graphWeight()
+    }else if (value=="动态图"){
+      option = this._graphDynamic()  
+    }else{
+      return false
+    }
+    this.data.items.push({ msg: "I am echart", type: "chart", option: option, dateTime: (new Date()).toISOString() })
+    temp = "items[" + (this.data.items.length - 1) + "]"
+    this.setData({
+      [temp]: this.data.items[this.data.items.length - 1],
+      "currIdx": this.data.items.length - 1
+    })
+    return true
+  },
+  _graphWeight(){
+    var data = _.filter(this.data.data,(x)=>{
+                   return x.key == "sign_weightKg"})
+      .map(x => { 
+        return { value:x.value.value,
+                 eDate:x.value.eDate,
+                 eTime:x.value.eTime,
+             timestamp:(new Date(x.value.eDate + " " + x.value.eTime)).getTime()
+             }
+      })
+      .sort((x,y)=>{
+        return x.timestamp-y.timestamp                        
+      })
+    console.log("!!!!!",data)
+    var option = {
+      title: {
+        text: '体重情况(公斤)',
+        subtext: '测试'
+      },
+      tooltip: {},
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: data.map(x=>{
+          let date = x.eDate.split(".")
+          let time = x.eTime.split(":") 
+          return `${date[1]}/${date[2]} ${time[0]}:${time[1]}`
+        })
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: '{value}'
+        }
+      },
+      dataZoom: [
+        {
+          show: true,
+          realtime: true,
+          start: 0,
+          end: 150,
+          xAxisIndex: [0, 1]
+        },
+      ],
+      series: [{
+        name: '体重(公斤)',
+        type: 'line',
+        symbolSize: 8,
+        data: data.map(x=>{
+            return x.value
+        }),
+        markPoint: {
+          data: [
+            { type: 'max', name: '最大值' },
+            { type: 'min', name: '最小值' }
+          ]
+        },
+        markLine: {
+          data: [
+            { type: 'average', name: '平均值' }
+          ]
+        } 
+      }]
+    };
+    console.log("option:",option)
+    return option
+  },
+  _graphDynamic(){
+    var data = [{
+      fixed: true,
+      x: 2,
+      y: 2,
+      symbolSize: 20,
+      id: '-1'
+    }];
+
+    var edges = [];
+
+    option = {
+      series: [{
+        type: 'graph',
+        layout: 'force',
+        animation: false,
+        data: data,
+        force: {
+          // initLayout: 'circular'
+          // gravity: 0
+          repulsion: 100,
+          edgeLength: 5
+        },
+        edges: edges
+      }]
+    };
+
+    setInterval(function () {
+      data.push({
+        id: data.length
+      });
+      var source = Math.round((data.length - 1) * Math.random());
+      var target = Math.round((data.length - 1) * Math.random());
+      if (source !== target) {
+        edges.push({
+          source: source,
+          target: target
+        });
+      }
+      myChart.setOption({
+        series: [{
+          roam: true,
+          data: data,
+          edges: edges
+        }]
+      });
+
+      // console.log('nodes: ' + data.length);
+      // console.log('links: ' + data.length);
+    }, 500);
   }
 })

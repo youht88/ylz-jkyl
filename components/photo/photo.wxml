@@ -6,7 +6,7 @@
       <view class="content shadow">
         <view class="flex flex-direction justify-center">  
           <image id="photo" src="{{item.src}}" mode="aspectFit" style="width:250px"/>  
-          <text class="text-blue text-xs text-cut" style="width:250px">{{item.msg}}</text>           <text class="text-gray text-xs text-cut" style="width:250px">
+          <text class="text-blue text-xs text-cut" style="width:250px">{{item.msg}}</text>                        <text class="text-gray text-xs text-cut" style="width:250px">
             可能是【{{item.what.keyword}}】,可信度{{fun.round2(item.what.score*100,"%")}}
           </text> 
         </view>

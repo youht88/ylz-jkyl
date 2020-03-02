@@ -1,9 +1,11 @@
 const app = getApp();
 const _ = require('underscore')
 const SMcrypto = require("../../utils/smcrypto.js").SMcrypto
-const {util,Record} = require("../../utils/util.js")
+const {util,Record,BaiduAI} = require("../../utils/util.js")
 var record= new Record()
 var interval
+
+const bdAI = new BaiduAI(app.globalData.baseURL)
 
 Page({
   data: {
@@ -15,7 +17,8 @@ Page({
     scrolltop:0,
     color:"blue",
     currIdx:0,
-    currentEat:""
+    currentEat:"",
+    currentImgHash:""
   },
   ////////生命周期函数////////////
   _nextQuestion(msg){
@@ -146,16 +149,38 @@ Page({
     this.setData({color:"blue"})
   }, 
 
-  _add(obj,type){
-    this.data.items.push()
+  async _add(obj,type){
+    //this.data.items.push()
     let value = obj.msg
-    if (this.data.currentEat) {
-      value=value+this.data.currentEat
-    }
-    this.data.currentEat=""
-
     let temp
-    this.data.items.push({ msg: obj.msg, imgHash:obj.imgHash,type: type, dateTime: (new Date()).toISOString()})
+    if (this.data.currentImgHash && value.match(new RegExp(`^识别.*营养成分`))){
+      var result = await bdAI.getImageB64(this.data.currentImgHash)
+      result = await bdAI.general2textParse(result.data)
+      result = result.data.words_result.map(x=>x.words).join("")
+      console.log("营养成分", result)
+      let nutrition={}
+      temp = result.match(new RegExp(`(能量)([\\d\\.]+)(kj|千焦)([\\d\\.]+)%`,"i"))
+      nutrition.energyKj = temp?[parseFloat(temp[2]),temp[4]/100]:null
+      temp = result.match(new RegExp(`(蛋[白百]质)([\\d\\.]+)(g|克)([\\d\\.]+)%`))
+      nutrition.proteinG = temp ? [parseFloat(temp[2]),temp[4]/100]:null
+      temp = result.match(new RegExp(`(脂肪)([\\d\\.]+)(g|克)([\\d\\.]+)%`))
+      nutrition.fatG = temp ? [parseFloat(temp[2]), temp[4] / 100]:null
+      temp = result.match(new RegExp(`(碳水化合物)([\\d\\.]+)(g|克)([\\d\\.]+)%`))
+      nutrition.chG = temp ? [parseFloat(temp[2]), temp[4] / 100]:null
+      temp = result.match(new RegExp(`(钠)(钙)?(铁)?(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)?(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)?`))
+      console.log("??????",temp)
+      nutrition.sodiumMg = temp ? [parseFloat(temp[5]), temp[7] / 100]:null
+      if (temp[8]) nutrition.CaMg = temp ? [parseFloat(temp[9]), temp[11] / 100] : null
+      if (temp[12]) nutrition.FeMg = temp ? [parseFloat(temp[13]), temp[15] / 100] : null
+      console.log(nutrition)
+      return
+    }
+    if (this.data.currentEat && type!="info" && value.match(new RegExp(`^(吃了|喝了|抽了)`))) {
+      value=value+this.data.currentEat
+      this.setData({ currentEat: "" })
+    }
+
+    this.data.items.push({ msg: value, imgHash:obj.imgHash,type: type, dateTime: (new Date()).toISOString()})
     this.setData({ value: ""})
     if (!value || type=="info"){
       this.setData({
@@ -180,7 +205,7 @@ Page({
         }else{
           Object.keys(res.data).map(x=>{
             res.data[x].map(y=>{
-              //如果是饮食，需要精确定位
+              //如果是饮食，需要精确定位找出营养量
               if (x=="eat"){
                 util.request({url:`${app.globalData.baseURL}/food/${y.stuff}`}).then((food)=>{
                   if (food.data.length==0){
@@ -297,6 +322,8 @@ Page({
         }, pg, "loading").then((res1)=>{
             var hash = JSON.parse(res1.data).hash
             console.log("uploadFile end:",res1.data)
+            this.data.currentImgHash=hash
+            util.setClipboardData(hash)
             this.setData({
               ["items["+(this.data.items.length - 1)+"].msg"]:hash
             })
@@ -338,12 +365,14 @@ Page({
         url: `${app.globalData.baseURL}/food/id/${res.result}`
       }).then((res1)=>{
         if (res1.data){
-          this.data.currentEat = res1.data.name
-          this._add({imgHash:res1.data.imgHash,msg:res1.data.name}, "info")
+          this.setData({currentEat: res1.data.name})
+          console.log("this.data.currentEat", this.data.currentEat)
+          this._add({imgHash:res1.data.imgHash,msg:res1.data.name+",吃了多少？"}, "info")
         }else{
-          this.data.currentEat=""
+          this.setData({currentEat:""})
           this._add({msg:"未能识别"+res.result+",它是什么？"}, "info")
         }
+        
       })
     }).catch((e)=>{
       console.log(e)

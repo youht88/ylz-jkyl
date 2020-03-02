@@ -17,6 +17,25 @@ class Util{
 
     return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':')
   }
+  //clipboard
+  async setClipboardData(data){
+    return new Promise((resolve,reject)=>{
+      wx.setClipboardData({
+        data: data,
+        success: resolve,
+        fail: reject
+      })
+    })
+  }
+  async getClipboardData() {
+    return new Promise((resolve, reject) => {
+      wx.getClipboardData({
+        data: data,
+        success: (res)=>resolve(res.data),
+        fail: reject
+      })
+    })
+  }
   //交互
   showToast(title,icon){
     wx.showToast({title,icon})
@@ -283,6 +302,9 @@ class Util{
     })
   }
 }
+
+const util = new Util()
+
 class Map{
   constructor(id){
     this.ctx = wx.createMapContext(id,this)
@@ -364,8 +386,67 @@ class Record{
     this.audio.stop()
   }
 }
+class BaiduAI{
+  constructor(baseURL){
+    this.baseURL = baseURL
+    this.accessTokenText  ="24.9ffd022b10bee899135b55f95ebc3552.2592000.1583575700.282335-18401314"
+    this.accessTokenPic ="24.a17d67af3872c1938ede5b73021f0e2e.2592000.1583635267.282335-18405725"
+  }
+  async getImageB64(ipfsHash){
+    return new Promise((resolve,reject)=>{
+      util.downloadFile({
+        url:`${this.baseURL}/img/download/${ipfsHash}`
+      }).then((res1)=>{
+        util.readFile({
+          filePath: res1.tempFilePath,
+          encoding: "base64"
+        }).then(resolve).catch(reject)
+      }).catch(reject)
+    })
+  }
+  async table2textParse(imgB64){
+    return new Promise((resolve,reject)=>{
+      util.request({
+        url: `https://aip.baidubce.com/rest/2.0/solution/v1/form_ocr/request?access_token=${this.accessTokenText}`,
+        method: "post",
+        header: { "content-type": "application/x-www-form-urlencoded" },
+        data: {
+          image: imgB64,
+          is_sync: true,
+          request_type: "json"
+        }
+      }).then(resolve).catch(reject)
+    })
+  }
+  async general2textParse(imgB64){
+    return new Promise((resolve,reject)=>{
+      util.request({
+        url: `https://aip.baidubce.com/rest/2.0/ocr/v1/accurate?access_token=${this.accessTokenText}`,
+        method: "post",
+        header: { "content-type": "application/x-www-form-urlencoded" },
+        data: {
+          image: imgB64
+        }
+      }).then(resolve).catch(reject)
+    })
+  }
+  async general2objParse(imgB64){
+    return new Promise((resolve,reject)=>{
+      util.request({
+        url: `https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general?access_token=${this.accessTokenPic}`,
+        method: "post",
+        header: { "content-type": "application/x-www-form-urlencoded" },
+        data: {
+          image: imgB64
+        }
+      }).then(resolve).catch(reject)
+    })
+  }
+}
+
 module.exports = {
-  util  : new Util(),
+  util  : util,
   Map   : Map,
-  Record: Record
+  Record: Record,
+  BaiduAI:BaiduAI
 }

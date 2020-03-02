@@ -4,7 +4,7 @@
 </cu-custom>
 <view class="cu-timeline">
   <view class="cu-time">昨天</view>
-  <view class="cu-item cur cuIcon-noticefill">
+  <view class="cu-item cur cuIcon-noticefill" bind:tap="_onTap">
     <view class="content bg-green shadow-blur">
       <text>22:22</text> 【广州市】快件已到达地球
     </view>

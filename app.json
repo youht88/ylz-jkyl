@@ -5,7 +5,9 @@
     "pages/audio/audio",
     "pages/chart/chart",
     "pages/config/config",
-    "pages/timeline/timeline"
+    "pages/timeline/timeline",
+    "pages/mark/mark",
+    "pages/help/help"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -17,6 +19,10 @@
   "usingComponents": {
     "cu-custom": "/colorui/components/cu-custom"
   },
+  "requiredBackgroundModes": [
+    "audio",
+    "location"
+  ],
   "sitemapLocation": "sitemap.json",
   "plugins": {
     "WechatSI": {
@@ -31,5 +37,9 @@
     "scope.record": {
       "desc": "录音功能听取你的语音并转换成文字"
     }
-  }
+  },
+  "navigateToMiniProgramAppIdList": [
+    "wxb779d92e3d92b8a9",
+    "wxdc03b02a8c326536"
+  ]  
 }

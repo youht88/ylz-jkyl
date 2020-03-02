@@ -1,0 +1,14 @@
+<cu-custom bgColor="bg-gradual-green" isBack="{{true}}">
+  <view slot="backText">返回</view>
+  <view slot="content">帮助</view>
+</cu-custom>
+
+<block wx:for-items="{{cmdList}}" wx:for-item="title" wx:key="*this">
+    <view class="border-bottom margin text-xxl"><text class="text-gray ">{{title.title}}:</text></view>
+    <block wx:for-items="{{title.items}}" wx:for-item="command" wx:key="*this">
+        <view class="margin text-lg" 
+              bind:tap="_onBack" data-cmd="{{command}}">
+          <text class="cuIcon-title text-blue" >{{command}}</text>
+        </view>
+    </block>
+</block>

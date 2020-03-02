@@ -1,4 +1,5 @@
 // components/info/info.js
+const app = getApp()
 Component({
   options: {
     addGlobalClass: true,
@@ -7,6 +8,10 @@ Component({
   properties: {
     item: {
       type: Object
-    }
+    },
+    imgHash:{type:String}
   },
+  data:{
+    baseURL:app.globalData.baseURL
+  }
 })

@@ -1,11 +1,20 @@
 //app.js
+const SMcrypto = require("/utils/smcrypto.js").SMcrypto
+
 App({
   onLaunch: function() {
-    // 展示本地存储能力
-    var logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
-
+    // 本地密钥体系
+    var crypto
+    var keyStr = wx.getStorageSync("keys")
+    console.log("keys:", keyStr)
+    if (!keyStr) {
+      crypto = new SMcrypto({ generate: true })
+      wx.setStorageSync("keys", JSON.stringify({ publicKey: crypto.publicKey, privateKey: crypto.privateKey}))
+      console.log("privatekey1:", crypto.privateKey)
+    } else {
+      crypto = new SMcrypto(JSON.parse(keyStr))
+      console.log("privatekey2:", crypto.privateKey)
+    }
     // 登录
     wx.login({
       success: res => {
@@ -51,6 +60,12 @@ App({
     //this.globalData.baseURL="http://web1.imac1.youht.cc:8084"
     //this.globalData.baseURL = "http://192.168.31.119:6001"
     this.globalData.baseURL = "http://10.10.0.199:5000"
+    this.globalData.IconAnimal ="https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=4064283291,520199009&fm=74&app=80&f=JPEG&size=f121,90?sec=1880279984&t=b24f80de85ff357047609f47d65dc3b3"
+    this.globalData.IconGirl ="http://pics.sc.chinaz.com/Files/pic/icons128/rw_7/Vivian%20Chow.png"
+    this.globalData.IconSelf = ""
+
+    this.globalData.crypto = crypto
+    this.globalData.address = crypto.sha256(crypto.publicKey) 
   },
   globalData: {
     userInfo: null

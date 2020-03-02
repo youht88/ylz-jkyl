@@ -1,12 +1,18 @@
 <view  class="cu-chat">
   <view  class="cu-item">
-    <view class="cu-avatar round" style="background-image:url(https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1582011561539&di=14561e3dd131bd5a1affd62acba02b8a&imgtype=0&src=http%3A%2F%2Fpic.51yuansu.com%2Fpic3%2Fcover%2F02%2F15%2F74%2F59ae81abe8639_610.jpg);"></view>
+    <view class="cu-avatar round" style="background-image:url({{IconAI}});"></view>
     
     <view class="main">
       <view class="content shadow">
         <view class="flex flex-direction justify-center">  
-          <image id="photo" src="{{item.src}}" mode="aspectFit" style="width:250px;height:220px"/>  
-          <text class="text-blue text-xs text-cut" style="width:250px">{{item.msg}}</text>          
+          <image id="photo" src="{{item.src}}" mode="aspectFit" style="max-width:250px"/>  
+          <text class="text-blue text-sm text-cut" style="width:250px" 
+                bind:tap="_onReload" data-link="{{item.msg}}">
+                {{item.msg}}
+          </text> 
+          <text class="text-gray text-xs text-cut" style="width:250px" >
+            可能是【{{item.what.keyword}}】,可信度{{fun.round2(item.what.score*100,"%")}}
+          </text> 
         </view>
       </view>
     </view>

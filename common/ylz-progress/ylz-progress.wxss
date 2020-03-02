@@ -1,1 +1,5 @@
 /* common/progress/progress.wxss */
+
+.cu-progress.xxs {
+	height: 1rpx;
+}

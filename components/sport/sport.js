@@ -1,4 +1,4 @@
-// components/sign/sign.js
+const app = getApp()
 Component({
   options: {
     addGlobalClass: true,
@@ -8,5 +8,8 @@ Component({
     item: {
       type: Object
     }
+  },
+  data:{
+    IconAI:app.globalData.IconGirl
   }
 })

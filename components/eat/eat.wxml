@@ -1,8 +1,7 @@
 
 <view  class="cu-chat">
   <view  class="cu-item">
-    <view class="cu-avatar round" style="background-image:url(https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1582011561539&di=14561e3dd131bd5a1affd62acba02b8a&imgtype=0&src=http%3A%2F%2Fpic.51yuansu.com%2Fpic3%2Fcover%2F02%2F15%2F74%2F59ae81abe8639_610.jpg);"></view>
-    
+    <view class="cu-avatar round" style="background-image:url({{IconAI}})"></view>    
     <view class="main">
       <view class="content bg-gradual-green shadow">
         
@@ -10,11 +9,19 @@
           <view class="text-sm">
             {{item.msg.eDate}}-
             {{item.msg.eTime}}
+            <view class="round" style="position:absolute;top:5px;right:5px;width:30px;height:30px;background-image:url({{baseURL}}/img/download/{{item.msg.imgHash}})"/>
           </view>
           <view class="margin-td">
-            <text class="text-sm">{{item.msg.stuff}}</text>
             <text class="text-xxl">{{item.msg.value}}</text>
             <text class="text-sm">{{item.msg.unit}}</text>
+            <text class="text-sm text-cut">{{item.msg.stuff}}</text>
+          </view>
+          <view class="flex flex-direction" wx:if="{{item.msg.nutrition.energyKj}}">
+            <text class="text-xs"> 能量:{{fun.round2(item.msg.nutrition.energyKj[0])}}千焦，当日占比:{{fun.percent(item.msg.nutrition.energyKj[1])}}</text>
+            <text class="text-xs"> 蛋白质:{{fun.round2(item.msg.nutrition.proteinG[0])}}克,当日占比:{{fun.percent(item.msg.nutrition.proteinG[1])}}</text>
+            <text class="text-xs"> 脂肪:{{fun.round2(item.msg.nutrition.fatG[0])}}克,当日占比:{{fun.percent(item.msg.nutrition.fatG[1])}}</text>
+            <text class="text-xs"> 碳水化物:{{fun.round2(item.msg.nutrition.chG[0])}}克,当日占比:{{fun.percent(item.msg.nutrition.chG[1])}}</text>
+            <text class="text-xs"> 钠:{{fun.round2(item.msg.nutrition.sodiumMg[0])}}毫克,当日占比:{{fun.percent(item.msg.nutrition.sodiumMg[1])}}</text>
           </view>
         </view>
         
@@ -26,3 +33,14 @@
     <view class="date"> {{item.dateTime}}</view>
   </view>
 </view>
+
+<wxs module="fun">
+var round2 = function(data) {
+  return data.toFixed(2)  
+}
+var percent = function(data){
+  return (data*100).toFixed(2)+"%"
+}
+module.exports.round2 = round2;
+module.exports.percent = percent;
+</wxs>

@@ -6,7 +6,7 @@
     <view class="main">
       <view class="content bg-black shadow">
         
-        <view class="flex flex-wrap justify-start">  
+        <view class="flex flex-direction justify-start">  
           <view class="text-sm">
             {{item.msg.eDate}}-
             {{item.msg.eTime}}
@@ -18,7 +18,7 @@
         </view>
         
       </view>
-      <view class="flex-sub cu-tag margin-sm bg-blcak">睡眠</view>
+      <view class="flex-sub cu-tag margin-sm bg-black">睡眠</view>
     </view>
       
     

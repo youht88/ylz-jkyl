@@ -17,6 +17,39 @@ class Util{
 
     return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':')
   }
+  //交互
+  showToast(title,icon){
+    wx.showToast({title,icon})
+  }
+  showModal(title,content){
+    return new Promise((resolve,reject)=>{
+      wx.showModal({
+        title:title,
+        content:content,
+        success:(res)=>{
+          if (res.confirm){
+            resolve(true)
+          }else{
+            resolve(false)
+          }
+        },
+        fail:reject
+      })
+    })
+  }
+  showActionSheet(itemList){
+    return new Promise((resolve,reject)=>{
+      wx.showActionSheet({
+        itemList: itemList,
+        success: (res)=>{
+          resolve(res.tapIndex)
+        },
+        fail:(res)=>{
+          reject(res.errMsg)
+        }
+      })
+    })
+  }
   //扫描条形码或二维码
   scanCode(onlyFromCamera=false){
     return new Promise((resolve,reject)=>{
@@ -38,6 +71,54 @@ class Util{
         fail:reject
       })
     }) 
+  }
+  chooseImage(isCompressed){
+    return new Promise((resolve,reject)=>{
+      wx.chooseImage({
+        count: 1,
+        sizeType: isCompressed?['compressed']:['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success:resolve,
+        fail:reject
+      })
+    })
+  }
+  //file
+  readFile(option){
+    return new Promise((resolve,reject)=>{
+      wx.getFileSystemManager().readFile(
+        {
+          filePath:option.filePath,
+          encoding: option.encoding, //ascii,base64,binary,utf-8
+          success:resolve,
+          fail:reject
+        }
+      )       
+    })    
+  }
+  writeFile(option) {
+    return new Promise((resolve, reject) => {
+      wx.FileSystemManager().writeFile(
+        {
+          filePath: option.filePath,
+          data    : option.data,
+          encoding: option.encoding,  //ascii,base64,binary,utf-8
+          success: resolve,
+          fail: reject
+        }
+      )
+    })
+  }
+  rmFile(option) {
+    return new Promise((resolve, reject) => {
+      wx.FileSystemManager().unlinkFile(
+        {
+          filePath: option.filePath,
+          success: resolve,
+          fail: reject
+        }
+      )
+    })
   }
   //storage
   setStorage(key,value) {
@@ -102,6 +183,7 @@ class Util{
       wx.request({
         url: option.url,
         method: option.method,
+        header: option.header,
         data: option.data || {},
         success: resolve,
         fail: reject

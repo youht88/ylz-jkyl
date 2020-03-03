@@ -40,7 +40,7 @@ class Util{
   showToast(title,icon){
     wx.showToast({title,icon})
   }
-  showModal(title,content){
+  async showModal(title,content){
     return new Promise((resolve,reject)=>{
       wx.showModal({
         title:title,
@@ -56,7 +56,7 @@ class Util{
       })
     })
   }
-  showActionSheet(itemList){
+  async showActionSheet(itemList){
     return new Promise((resolve,reject)=>{
       wx.showActionSheet({
         itemList: itemList,
@@ -70,7 +70,7 @@ class Util{
     })
   }
   //扫描条形码或二维码
-  scanCode(onlyFromCamera=false){
+  async scanCode(onlyFromCamera=false){
     return new Promise((resolve,reject)=>{
       wx.scanCode({
           onlyFromCamera:onlyFromCamera,
@@ -79,7 +79,7 @@ class Util{
       })
     })
   }
-  takePhoto(){
+  async takePhoto(){
     console.log("takePhoto is begin")
     return new Promise((resolve,reject)=>{
       const ctx = wx.createCameraContext()
@@ -91,7 +91,7 @@ class Util{
       })
     }) 
   }
-  chooseImage(isCompressed){
+  async chooseImage(isCompressed){
     return new Promise((resolve,reject)=>{
       wx.chooseImage({
         count: 1,
@@ -103,7 +103,7 @@ class Util{
     })
   }
   //file
-  readFile(option){
+  async readFile(option){
     return new Promise((resolve,reject)=>{
       wx.getFileSystemManager().readFile(
         {
@@ -115,7 +115,7 @@ class Util{
       )       
     })    
   }
-  writeFile(option) {
+  async writeFile(option) {
     return new Promise((resolve, reject) => {
       wx.FileSystemManager().writeFile(
         {
@@ -128,7 +128,7 @@ class Util{
       )
     })
   }
-  rmFile(option) {
+  async rmFile(option) {
     return new Promise((resolve, reject) => {
       wx.FileSystemManager().unlinkFile(
         {
@@ -140,7 +140,7 @@ class Util{
     })
   }
   //storage
-  setStorage(key,value) {
+  async setStorage(key,value) {
     return new Promise((resolve, reject) => {
       try{
         let data = JSON.stringify(value)
@@ -155,7 +155,7 @@ class Util{
       }
     })
   }
-  getStorage(key) {
+  async getStorage(key) {
     return new Promise((resolve, reject) => {
       try{
         wx.getStorage({
@@ -170,7 +170,7 @@ class Util{
       }
     })
   }
-  getStorageInfo() {
+  async getStorageInfo() {
     return new Promise((resolve, reject) => {
       wx.getStorageInfo({
         success: (res) => resolve(res),
@@ -178,7 +178,7 @@ class Util{
       })
     })
   }
-  clearStorageInfo() {
+  async clearStorageInfo() {
     return new Promise((resolve, reject) => {
       wx.clearStorageInfo({
         success: (res) => resolve(res),
@@ -186,7 +186,7 @@ class Util{
       })
     })
   }
-  removeStorage(key) {
+  async removeStorage(key) {
     return new Promise((resolve, reject) => {
       wx.removeStorage({
         key : key,
@@ -197,7 +197,7 @@ class Util{
   }
 
   //获取网络数据
-  request(option) {
+  async request(option) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: option.url,
@@ -209,7 +209,7 @@ class Util{
       })
     })
   }
-  downloadFile(option,pgComponent,key){
+  async downloadFile(option,pgComponent,key){
     //pgComponent是一个progress组件，key为该组件反应进度指标（0-100）的值
     return new Promise((resolve,reject)=>{
       var task = wx.downloadFile(
@@ -231,7 +231,7 @@ class Util{
       })
     })
   }
-  uploadFile(option,pgComponent,key){
+  async uploadFile(option,pgComponent,key){
     //pgComponent是一个progress组件，key为该组件反应进度指标（0-100）的值
     return new Promise((resolve, reject) => {
       var task = wx.uploadFile(
@@ -257,7 +257,7 @@ class Util{
     })
   }
   //中英文互译
-  translate(option){
+  async translate(option){
     return new Promise((resolve,reject)=>{
       plugin.translate({
         lfrom:option.lfrom,
@@ -279,7 +279,7 @@ class Util{
     })
   }
   //语音合成播放
-  speech(option){
+  async speech(option){
     return new Promise((resolve,reject)=>{
       plugin.textToSpeech({
         lang: option.lang||"zh_CN",
@@ -309,7 +309,7 @@ class Map{
   constructor(id){
     this.ctx = wx.createMapContext(id,this)
   }
-  moveTo(option={}){
+  async moveTo(option={}){
     return new Promise((resolve,reject)=>{
       this.ctx.moveToLocation({
         longitude: option.longitude || null,
@@ -319,7 +319,7 @@ class Map{
       })
     })
   }
-  getLocation(option={}){
+  async getLocation(option={}){
     return new Promise((resolve,reject)=>{
       wx.getLocation({
         type:option.type,
@@ -328,7 +328,7 @@ class Map{
       })
     })
   }
-  startUpdate(option={background:true,onChange:null}){
+  async startUpdate(option={background:true,onChange:null}){
     return new Promise((resolve,reject)=>{
       if (option.background){
         wx.startLocationUpdateBackground({
@@ -349,7 +349,7 @@ class Map{
       }
     })
   }
-  stopUpdate(){
+  async stopUpdate(){
     return new Promise((resolve,reject)=>{
       wx.stopLocationUpdate({
         success:(res)=>{
@@ -386,67 +386,9 @@ class Record{
     this.audio.stop()
   }
 }
-class BaiduAI{
-  constructor(baseURL){
-    this.baseURL = baseURL
-    this.accessTokenText  ="24.9ffd022b10bee899135b55f95ebc3552.2592000.1583575700.282335-18401314"
-    this.accessTokenPic ="24.a17d67af3872c1938ede5b73021f0e2e.2592000.1583635267.282335-18405725"
-  }
-  async getImageB64(ipfsHash){
-    return new Promise((resolve,reject)=>{
-      util.downloadFile({
-        url:`${this.baseURL}/img/download/${ipfsHash}`
-      }).then((res1)=>{
-        util.readFile({
-          filePath: res1.tempFilePath,
-          encoding: "base64"
-        }).then(resolve).catch(reject)
-      }).catch(reject)
-    })
-  }
-  async table2textParse(imgB64){
-    return new Promise((resolve,reject)=>{
-      util.request({
-        url: `https://aip.baidubce.com/rest/2.0/solution/v1/form_ocr/request?access_token=${this.accessTokenText}`,
-        method: "post",
-        header: { "content-type": "application/x-www-form-urlencoded" },
-        data: {
-          image: imgB64,
-          is_sync: true,
-          request_type: "json"
-        }
-      }).then(resolve).catch(reject)
-    })
-  }
-  async general2textParse(imgB64){
-    return new Promise((resolve,reject)=>{
-      util.request({
-        url: `https://aip.baidubce.com/rest/2.0/ocr/v1/accurate?access_token=${this.accessTokenText}`,
-        method: "post",
-        header: { "content-type": "application/x-www-form-urlencoded" },
-        data: {
-          image: imgB64
-        }
-      }).then(resolve).catch(reject)
-    })
-  }
-  async general2objParse(imgB64){
-    return new Promise((resolve,reject)=>{
-      util.request({
-        url: `https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general?access_token=${this.accessTokenPic}`,
-        method: "post",
-        header: { "content-type": "application/x-www-form-urlencoded" },
-        data: {
-          image: imgB64
-        }
-      }).then(resolve).catch(reject)
-    })
-  }
-}
 
 module.exports = {
   util  : util,
   Map   : Map,
-  Record: Record,
-  BaiduAI:BaiduAI
+  Record: Record
 }

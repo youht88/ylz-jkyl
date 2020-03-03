@@ -9,7 +9,7 @@
           <view class="text-sm">
             {{item.msg.eDate}}-
             {{item.msg.eTime}}
-            <view class="round" style="position:absolute;top:5px;right:5px;width:30px;height:30px;background-image:url({{baseURL}}/img/download/{{item.msg.imgHash}})"/>
+            <view wx:if="{{item.msg.imgHash}}" class="round" style="position:absolute;top:5px;right:5px;width:30px;height:30px;background-image:url({{baseURL}}/img/download/{{item.msg.imgHash}})"/>
           </view>
           <view class="margin-td">
             <text class="text-xxl">{{item.msg.value}}</text>

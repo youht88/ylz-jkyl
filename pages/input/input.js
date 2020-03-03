@@ -1,7 +1,8 @@
 const app = getApp();
 const _ = require('underscore')
 const SMcrypto = require("../../utils/smcrypto.js").SMcrypto
-const {util,Record,BaiduAI} = require("../../utils/util.js")
+const {util,Record} = require("../../utils/util.js")
+const {BaiduAI} = require("../../utils/baiduAI.js")
 var record= new Record()
 var interval
 
@@ -152,28 +153,13 @@ Page({
   async _add(obj,type){
     //this.data.items.push()
     let value = obj.msg
-    let temp
-    if (this.data.currentImgHash && value.match(new RegExp(`^识别.*营养成分`))){
-      var result = await bdAI.getImageB64(this.data.currentImgHash)
-      result = await bdAI.general2textParse(result.data)
-      result = result.data.words_result.map(x=>x.words).join("")
-      console.log("营养成分", result)
-      let nutrition={}
-      temp = result.match(new RegExp(`(能量)([\\d\\.]+)(kj|千焦)([\\d\\.]+)%`,"i"))
-      nutrition.energyKj = temp?[parseFloat(temp[2]),temp[4]/100]:null
-      temp = result.match(new RegExp(`(蛋[白百]质)([\\d\\.]+)(g|克)([\\d\\.]+)%`))
-      nutrition.proteinG = temp ? [parseFloat(temp[2]),temp[4]/100]:null
-      temp = result.match(new RegExp(`(脂肪)([\\d\\.]+)(g|克)([\\d\\.]+)%`))
-      nutrition.fatG = temp ? [parseFloat(temp[2]), temp[4] / 100]:null
-      temp = result.match(new RegExp(`(碳水化合物)([\\d\\.]+)(g|克)([\\d\\.]+)%`))
-      nutrition.chG = temp ? [parseFloat(temp[2]), temp[4] / 100]:null
-      temp = result.match(new RegExp(`(钠)(钙)?(铁)?(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)?(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)?`))
-      console.log("??????",temp)
-      nutrition.sodiumMg = temp ? [parseFloat(temp[5]), temp[7] / 100]:null
-      if (temp[8]) nutrition.CaMg = temp ? [parseFloat(temp[9]), temp[11] / 100] : null
-      if (temp[12]) nutrition.FeMg = temp ? [parseFloat(temp[13]), temp[15] / 100] : null
-      console.log(nutrition)
-      return
+    let temp,res1,res2
+    if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*营养成分`))){
+      let nutrition = await bdAI.parseNutritionPic(this.data.currentImgHash)
+      if (nutrition){ 
+       await util.showModal(JSON.stringify(nutrition))
+    }
+      return 
     }
     if (this.data.currentEat && type!="info" && value.match(new RegExp(`^(吃了|喝了|抽了)`))) {
       value=value+this.data.currentEat
@@ -192,191 +178,149 @@ Page({
     if (this._isGraph(value)) return
     var url = `${app.globalData.baseURL}/health/parse/${value}`
     console.log("url:",url)
-    util.request({
+    res1 = await util.request({
        url:url
-     }).then((res)=>{
-        console.log("result:",res.data)
-        if (JSON.stringify(res.data)=="{}"){
-          this.data.items.push({ msg: "抱歉，我没有理解这句话。愿意帮我标记一下吗？我会努力学习的！", type: "info",text:value})
-          this.setData({
-            items: this.data.items,
-            "currIdx": this.data.items.length - 1
-          })  
-        }else{
-          Object.keys(res.data).map(x=>{
-            res.data[x].map(y=>{
-              //如果是饮食，需要精确定位找出营养量
-              if (x=="eat"){
-                util.request({url:`${app.globalData.baseURL}/food/${y.stuff}`}).then((food)=>{
-                  if (food.data.length==0){
-                    console.log("no")
-                    this.data.items.push({ msg: y, type: x, dateTime: (new Date()).toISOString() })
-                    this.data.data.push({ key: x, value: y })
-                    this.setData({
-                      items: this.data.items,
-                      "currIdx": this.data.items.length - 1
-                    })  
-                  }else if (food.data.length==1){
-                    console.log("one", `${ food.data[0].split(":")[1] }`)
-                    util.request({
-                      url: `${app.globalData.baseURL}/food/${food.data[0].split(":")[1]}/${y.value}/${y.unit}`
-                    }).then(res2 => {
-                      console.log("one:",res2.data)
-                      this.data.items.push({ 
-                         msg: {
-                           stuff:res2.data.name,
-                           value:y.value,
-                           unit: y.unit,
-                           nutrition:res2.data.nutrition,
-                           imgHash:res2.data.imgHash,
-                           eDate:y.eDate,
-                           eTime:y.eTime
-                         }, type: x, dateTime: (new Date()).toISOString() })
-                      this.data.data.push({ key: x, value: {
-                        stuff: res2.data.name,
-                        value: y.value,
-                        unit: y.unit,
-                        nutrition: res2.data.nutrition,
-                        eDate: y.eDate,
-                        eTime: y.eTime
-                       }})
-                      this.setData({
-                        items: this.data.items,
-                        "currIdx": this.data.items.length - 1
-                      })  
-                    })
-                  }else{
-                    console.log("multi")
-                    util.showActionSheet(food.data).then(idx=>{
-                      util.request({
-                        url: `${app.globalData.baseURL}/food/${food.data[idx].split(":")[1]}/${y.value}/${y.unit}`})
-                         .then(res2=>{
-                          console.log("one:", res2.data)
-                          this.data.items.push({
-                            msg: {
-                              stuff: res2.data.name,
-                              value: y.value,
-                              unit: y.unit,
-                              nutrition: res2.data.nutrition,
-                              imgHash:res2.data.imgHash,
-                              eDate: y.eDate,
-                              eTime: y.eTime
-                            }, type: x, dateTime: (new Date()).toISOString()
-                          })
-                          this.data.data.push({
-                            key: x, value: {
-                              stuff: res2.data.name,
-                              value: y.value,
-                              unit: y.unit,
-                              nutrition: res2.data.nutrition,
-                              eDate: y.eDate,
-                              eTime: y.eTime
-                            }
-                          })
-                           this.setData({
-                             items: this.data.items,
-                             "currIdx": this.data.items.length - 1
-                           })  
-                      })
-                    })
-                  }
+     })
+    console.log("result:",res1.data)
+    if (JSON.stringify(res1.data)=="{}"){
+      this.data.items.push({ msg: "抱歉，我没有理解这句话。愿意帮我标记一下吗？我会努力学习的！", type: "info",text:value})
+    }else{
+      await Promise.all(Object.keys(res1.data).map(x=>{
+        return Promise.all(res1.data[x].map(async y=>{
+          //如果是饮食，需要精确定位找出营养量
+          if (x=="eat"){
+            let food = await util.request({url:`${app.globalData.baseURL}/food/${y.stuff}`})
+            if (food.data.length==0){
+              console.log("no")
+              this.data.items.push({ msg: y, type: x, dateTime: (new Date()).toISOString() })
+              this.data.data.push({ key: x, value: y })  
+            }else{
+              if (food.data.length==1){
+                console.log("one", `${ food.data[0].split(":")[1] }`)
+                res2 = await util.request({
+                  url: `${app.globalData.baseURL}/food/${food.data[0].split(":")[1]}/${y.value}/${y.unit}`
                 })
               }else{
-                this.data.items.push({msg:y, type: x, dateTime: (new Date()).toISOString() })
-                this.data.data.push({key:x,value:y})
-                this.setData({
-                  items: this.data.items,
-                  "currIdx": this.data.items.length - 1
-                })  
+                console.log("multi")
+                let idx = await util.showActionSheet(food.data)
+                res2 = await util.request({
+                  url: `${app.globalData.baseURL}/food/${food.data[idx].split(":")[1]}/${y.value}/${y.unit}`})
               }
-            })
-          })
-          console.log("data:",this.data.data)
-        }
-     }).catch((error)=>{
-       console.log(error)
-     })
+              this.data.items.push({
+                msg: {
+                  stuff: res2.data.name,
+                  value: y.value,
+                  unit: y.unit,
+                  nutrition: res2.data.nutrition,
+                  imgHash: res2.data.imgHash,
+                  eDate: y.eDate,
+                  eTime: y.eTime
+                }, type: x, dateTime: (new Date()).toISOString()
+              })
+              this.data.data.push({
+                key: x, value: {
+                  stuff: res2.data.name,
+                  value: y.value,
+                  unit: y.unit,
+                  nutrition: res2.data.nutrition,
+                  eDate: y.eDate,
+                  eTime: y.eTime
+                }
+              })
+            }
+          }else{
+            this.data.items.push({msg:y, type: x, dateTime: (new Date()).toISOString() })
+            this.data.data.push({key:x,value:y})
+          }
+        }))
+      }))
+    }
+    console.log("data！！:",this.data.items)
+    this.setData({
+      items: this.data.items,
+      "currIdx": this.data.items.length - 1
+    })  
   },
   _onCameraTap(){
     if (!this.data.isCamera){
       this.setData({isCamera:true})
     }
   },
-  _takePhoto(){
-    util.chooseImage(true).then((res)=>{
-      console.log(res)
-      var tempFilePath = res.tempFilePaths[0]
-      if (res){
-        this.data.items.push({ msg: "正在存入ipfs网络...", type: "photo", src: tempFilePath, dateTime: (new Date()).toISOString() })
+  async _takePhoto(){
+    let res,res1,res2,res3
+    res = await util.chooseImage(true)
+    console.log(res)
+    var tempFilePath = res.tempFilePaths[0]
+    if (res){
+      this.data.items.push({ msg: "正在存入ipfs网络...", type: "photo", src: tempFilePath, dateTime: (new Date()).toISOString() })
+      this.setData({
+        items: this.data.items,
+        "currIdx": this.data.items.length-1
+      }) 
+      //上传到服务器
+      var pg = this.selectComponent("#progress")
+      console.log("uploadFile start:",pg)
+      try{
+        res1 = await util.uploadFile({
+            url:`${app.globalData.baseURL}/img/upload`,
+            filePath:tempFilePath,
+            name:"img",
+          }, pg, "loading")
+        let hash = JSON.parse(res1.data).hash
+        console.log("uploadFile end:", res1.data)
+        this.data.currentImgHash = hash
+        util.setClipboardData(hash)
         this.setData({
-          items: this.data.items,
-          "currIdx": this.data.items.length-1
-        }) 
-        //上传到服务器
-        var pg = this.selectComponent("#progress")
-        console.log("uploadFile start:",pg)
-        util.uploadFile({
-           url:`${app.globalData.baseURL}/img/upload`,
-           filePath:tempFilePath,
-           name:"img",
-        }, pg, "loading").then((res1)=>{
-            var hash = JSON.parse(res1.data).hash
-            console.log("uploadFile end:",res1.data)
-            this.data.currentImgHash=hash
-            util.setClipboardData(hash)
-            this.setData({
-              ["items["+(this.data.items.length - 1)+"].msg"]:hash
-            })
-            //识别这张图片
-            util.readFile({
-               filePath:tempFilePath,
-               encoding:"base64"
-            }).then((res2)=>{
-              console.log("res2",res2)
-              util.request({
-                url: "https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general?access_token=24.a17d67af3872c1938ede5b73021f0e2e.2592000.1583635267.282335-18405725",
-                method: "post",
-                header: { "content-type": "application/x-www-form-urlencoded" },
-                data: {
-                  image: res2.data,
-                  baike_num: 0
-                }
-              }).then((res3) => {
-                console.log(res3)
-                util.showToast("success")
-                this.setData({
-                  ["items[" + (this.data.items.length - 1) + "].what"]: res3.data.result[0]
-                })
-              }).catch((err)=>{
-                util.showModal("警告",JSON.stringify(err))
-              })
-            })
-        }).catch((err)=>{
-            console.log("uploadFile end:",err)
+          ["items[" + (this.data.items.length - 1) + "].msg"]: hash
         })
+      }catch(err){
+        console.log("uploadFile end:", err)
       }
-      this.setData({isCamera:false})
-    })
-  },
-  _onQrcodeTap(){
-    console.log("start qrcode")
-    util.scanCode().then((res)=>{
-      util.request({
-        url: `${app.globalData.baseURL}/food/id/${res.result}`
-      }).then((res1)=>{
-        if (res1.data){
-          this.setData({currentEat: res1.data.name})
-          console.log("this.data.currentEat", this.data.currentEat)
-          this._add({imgHash:res1.data.imgHash,msg:res1.data.name+",吃了多少？"}, "info")
-        }else{
-          this.setData({currentEat:""})
-          this._add({msg:"未能识别"+res.result+",它是什么？"}, "info")
-        }
-        
+      //识别这张图片
+      res2 = await util.readFile({
+          filePath:tempFilePath,
+          encoding:"base64"
       })
-    }).catch((e)=>{
-      console.log(e)
-    })
+      console.log("res2",res2)
+      try{
+        res3=await util.request({
+          url: "https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general?access_token=24.a17d67af3872c1938ede5b73021f0e2e.2592000.1583635267.282335-18405725",
+          method: "post",
+          header: { "content-type": "application/x-www-form-urlencoded" },
+          data: {
+            image: res2.data,
+            baike_num: 0
+          }
+        })
+        console.log(res3)
+        util.showToast("success")
+        this.setData({
+          ["items[" + (this.data.items.length - 1) + "].what"]: res3.data.result[0]
+        })
+      }catch(err){
+        util.showModal("警告", JSON.stringify(err))
+      }
+    }
+    this.setData({isCamera:false})
+  },
+  async _onQrcodeTap(){
+    console.log("start qrcode")
+    try{
+      let res = await util.scanCode()
+      let res1 = await  util.request({
+        url: `${app.globalData.baseURL}/food/id/${res.result}`
+      })
+      if (res1.data){
+        this.setData({currentEat: res1.data.name})
+        console.log("this.data.currentEat", this.data.currentEat)
+        this._add({imgHash:res1.data.imgHash,msg:res1.data.name+",吃了多少？"}, "info")
+      }else{
+        this.setData({currentEat:""})
+        this._add({msg:"未能识别"+res.result+",它是什么？"}, "info")
+      }
+    }catch(err){
+      console.log("_onQrcoceTap:",err)
+    }
   },
 
   _onTest(){

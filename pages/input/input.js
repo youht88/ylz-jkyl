@@ -149,11 +149,14 @@ Page({
     record.stopRec()
     this.setData({color:"blue"})
   }, 
-
+ 
   async _add(obj,type){
-    //this.data.items.push()
     let value = obj.msg
     let temp,res1,res2
+    if (value.match(new RegExp(`^建议`))) {
+      console.log(util.list2json(this.data.data))
+      return
+    }
     if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*营养成分`))){
       let nutrition = await bdAI.parseNutritionPic(this.data.currentImgHash)
       if (nutrition){ 

@@ -4,7 +4,7 @@ const formatNumber = n => {
   n = n.toString()
   return n[1] ? n : '0' + n
 }
-
+//单纯测试，此时在 branch imac1上
 class Util{
   //返回日期字串 格式为YYYY/MM/DD HH:mi:SS
   formatTime(date){  

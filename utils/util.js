@@ -375,7 +375,7 @@ class Util{
     //            "weight":[{value:75,eDate:"2020.03.05",eTime:"07:30:00"},
     //                      {value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}]
     // }
-    
+    return data
   }
 }
 

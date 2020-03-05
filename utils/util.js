@@ -6,6 +6,12 @@ const formatNumber = n => {
 }
 //单纯测试，此时在 branch imac1上
 class Util{
+  constructor(){
+    wx.setInnerAudioOption({
+      mixWithOther: true,
+      obeyMuteSwitch: false,
+    })
+  }
   //返回日期字串 格式为YYYY/MM/DD HH:mi:SS
   formatTime(date){  
     const year = date.getFullYear()
@@ -279,23 +285,27 @@ class Util{
     })
   }
   //语音合成播放
-  async speech(option){
+  async speech(content,wait=true){
     return new Promise((resolve,reject)=>{
       plugin.textToSpeech({
-        lang: option.lang||"zh_CN",
+        lang: "zh_CN",
         tts: true,
-        content: option.content,
-        obeyMuteSwitch: false,
+        content: content,
         success: function (res) {
           console.log("succ tts", res.filename)
-          wx.createInnerAudioContext({src:encodeURI(res.filename),autoplay:true})
-          wx.playVoice({
-            filePath:encodeURI(res.filename)
-          })
-          resolve(res)
+          const innerAudioContext = wx.createInnerAudioContext()
+          innerAudioContext.src = encodeURI(res.filename)
+          innerAudioContext.play()
+          if (wait){
+            innerAudioContext.onEnded(()=>{
+              resolve(res)
+            })
+          }else{
+            resolve(res)
+          }
         },
-        fail: function (res) {
-          console.log("fail tts", res)
+        fail: function (err) {
+          console.log("fail tts", err)
           reject(res)
         }
       })
@@ -316,23 +326,23 @@ class Util{
     //json的结构将以日期为键分组，然后对每个key类别形成按时间生序的对象列表
     //例如：传入数据：
     //list = [{key:"eat",value:{stuff:"apple",value:1,eDate:"2020.03.04",eTime:"07:00:00"}},
-    //        {key:"eat",value:{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"}},
-    //        {key:"eat",value:{stuff:"pear",value:3,eDate:"2020.03.04",eTime:"08:00:00"}},
-    //        {key:"eat",value:{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}},
-    //        {key:"weight",value:{value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}},
-    //        {key:"weight",value:{value:75,eDate:"2020.03.05",eTime:"07:30:00"}}
-    //       ]
+    // {key:"eat",value:{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"}},
+    // {key:"eat",value:{stuff:"pear",value:3,eDate:"2020.03.04",eTime:"08:00:00"}},
+    // {key:"eat",value:{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}},
+    // {key:"weight",value:{value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}},
+    // {key:"weight",value:{value:75,eDate:"2020.03.05",eTime:"07:30:00"}}
+    // ]
     // 输出数据:
     // {
-    //   "2020.03.04":{"eat":[{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"},
-    //                      { stuff: "apple", value: 1, eDate: "2020.03.04", eTime: "07:00:00" },
-    //                      { stuff: "pear", value: 3, eDate: "2020.03.04", eTime: "08:00:00" }]},
-    //   "2020.03.05":{"eat":[{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}],
-    //               "weight":[{value:75,eDate:"2020.03.05",eTime:"07:30:00"},
-    //                         {value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}]
+    // "2020.03.04":{"eat":[{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"},
+    // { stuff: "apple", value: 1, eDate: "2020.03.04", eTime: "07:00:00" },
+    // { stuff: "pear", value: 3, eDate: "2020.03.04", eTime: "08:00:00" }]},
+    // "2020.03.05":{"eat":[{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}],
+    // "weight":[{value:75,eDate:"2020.03.05",eTime:"07:30:00"},
+    // {value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}]
     // }
-    try{
-      let res1,res2,res3
+    try {
+      let res1, res2, res3
       res1 = _.chain(list).filter(x => x.key == key || !key).filter(x => x.date == date || !date)
       res2 = res1.groupBy(x => x.value.eDate).mapObject(x => _.sortBy(x, y => y.value.eTime))
       res3 = res2.mapObject(x => {

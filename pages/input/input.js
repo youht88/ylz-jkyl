@@ -182,10 +182,20 @@ Page({
     if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*营养成分`))){
       let nutrition = await bdAI.parseNutritionPic(this.data.currentImgHash)
       if (nutrition){ 
-       await util.showModal(JSON.stringify(nutrition))
-    }
+       await util.showModal("营养成分",JSON.stringify(nutrition))
+      }
       return 
     }
+    
+    if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*表格`))) {
+      let table = await bdAI.parseTablePic(this.data.currentImgHash)
+      if (table) {
+        console.log("table:",table.forms)
+        await util.showModal("表格数据",JSON.stringify(table))
+      }
+      return
+    }
+
     if (this.data.currentEat && type!="info" && value.match(new RegExp(`^(吃了|喝了|抽了)`))) {
       value=value+this.data.currentEat
       this.setData({ currentEat: "" })

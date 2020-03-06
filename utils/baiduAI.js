@@ -56,6 +56,28 @@ class BaiduAI{
       }).then(resolve).catch(reject)
     })
   }
+  async general2tableParse(imgB64) {
+    return new Promise((resolve, reject) => {
+      util.request({
+        url: `https://aip.baidubce.com/rest/2.0/solution/v1/form_ocr/request?access_token=${this.accessTokenText}`,
+        method: "post",
+        header: { "content-type": "application/x-www-form-urlencoded" },
+        data: {
+          image: imgB64,
+          is_sync:true,
+          request_type:"json"
+        }
+      }).then(resolve).catch(reject)
+    })
+  }
+  async parseTablePic(imgHash){
+    let result, table = {}
+    let temp
+    result = await this.getImageB64(imgHash)
+    result = await this.general2tableParse(result.data)
+    console.log("result0:", result.data.result.result_data)
+    return JSON.parse(result.data.result.result_data)
+  }
   async parseNutritionPic(imgHash) {
     let result, nutrition = {}
     let temp

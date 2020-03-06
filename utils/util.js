@@ -36,7 +36,6 @@ class Util{
   async getClipboardData() {
     return new Promise((resolve, reject) => {
       wx.getClipboardData({
-        data: data,
         success: (res)=>resolve(res.data),
         fail: reject
       })

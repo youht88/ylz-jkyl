@@ -153,6 +153,30 @@ Page({
   async _add(obj,type){
     let value = obj.msg
     let temp,res1,res2
+    let cid,data,path
+    if (value.match(new RegExp("ipfs.put"))) {
+      temp = await util.request({
+         url:`${app.globalData.baseURL}/ipfs/dagPut`,
+         method:"post",
+         data:{data:this.data.data}
+      })
+      cid = temp.data
+      util.setClipboardData(cid)
+      //util.showModal("返回结果",cid)
+      this._add({msg:cid},"info")
+      return
+    }
+    if (value.match(new RegExp("^ipfs.get"))) {
+      cid = await util.getClipboardData()
+      path= value.split(":")[1]
+      temp = await util.request({
+        url: `${app.globalData.baseURL}/ipfs/dagGet`,
+        method: "post",
+        data: { cid: cid ,path:path}
+      })
+      util.showModal("返回结果", JSON.stringify(temp.data))
+      return
+    }
 
     if (value.match(new RegExp("^播放"))){
       await util.speech("还有其他吗",true)

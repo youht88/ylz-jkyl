@@ -169,10 +169,13 @@ Page({
       nutrition.chG = temp ? [parseFloat(temp[2]), temp[4] / 100]:null
       temp = result.match(new RegExp(`(钠)(钙)?(铁)?(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)?(([\\d\\.]+)(mg|毫克)([\\d\\.]+)%)?`))
       console.log("??????",temp)
-      nutrition.sodiumMg = temp ? [parseFloat(temp[5]), temp[7] / 100]:null
-      if (temp[8]) nutrition.CaMg = temp ? [parseFloat(temp[9]), temp[11] / 100] : null
-      if (temp[12]) nutrition.FeMg = temp ? [parseFloat(temp[13]), temp[15] / 100] : null
+      if (temp){
+        nutrition.sodiumMg = temp ? [parseFloat(temp[5]), temp[7] / 100]:null
+        if (temp[8]) nutrition.CaMg = temp ? [parseFloat(temp[9]), temp[11] / 100] : null
+        if (temp[12]) nutrition.FeMg = temp ? [parseFloat(temp[13]), temp[15] / 100] : null
+      }
       console.log(nutrition)
+      this._add({msg:JSON.stringify(nutrition)},"info")
       return
     }
     if (this.data.currentEat && type!="info" && value.match(new RegExp(`^(吃了|喝了|抽了)`))) {

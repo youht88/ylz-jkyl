@@ -1,11 +1,17 @@
 const plugin = requirePlugin("WechatSI")
-
+const _ = require("underscore")
 const formatNumber = n => {
   n = n.toString()
   return n[1] ? n : '0' + n
 }
 
 class Util{
+  constructor(){
+    wx.setInnerAudioOption({
+      mixWithOther: true,
+      obeyMuteSwitch: false,
+    })
+  }
   //返回日期字串 格式为YYYY/MM/DD HH:mi:SS
   formatTime(date){  
     const year = date.getFullYear()
@@ -40,7 +46,7 @@ class Util{
   showToast(title,icon){
     wx.showToast({title,icon})
   }
-  showModal(title,content){
+  async showModal(title,content){
     return new Promise((resolve,reject)=>{
       wx.showModal({
         title:title,
@@ -56,7 +62,7 @@ class Util{
       })
     })
   }
-  showActionSheet(itemList){
+  async showActionSheet(itemList){
     return new Promise((resolve,reject)=>{
       wx.showActionSheet({
         itemList: itemList,
@@ -70,7 +76,7 @@ class Util{
     })
   }
   //扫描条形码或二维码
-  scanCode(onlyFromCamera=false){
+  async scanCode(onlyFromCamera=false){
     return new Promise((resolve,reject)=>{
       wx.scanCode({
           onlyFromCamera:onlyFromCamera,
@@ -79,7 +85,7 @@ class Util{
       })
     })
   }
-  takePhoto(){
+  async takePhoto(){
     console.log("takePhoto is begin")
     return new Promise((resolve,reject)=>{
       const ctx = wx.createCameraContext()
@@ -91,7 +97,7 @@ class Util{
       })
     }) 
   }
-  chooseImage(isCompressed){
+  async chooseImage(isCompressed){
     return new Promise((resolve,reject)=>{
       wx.chooseImage({
         count: 1,
@@ -103,7 +109,7 @@ class Util{
     })
   }
   //file
-  readFile(option){
+  async readFile(option){
     return new Promise((resolve,reject)=>{
       wx.getFileSystemManager().readFile(
         {
@@ -115,7 +121,7 @@ class Util{
       )       
     })    
   }
-  writeFile(option) {
+  async writeFile(option) {
     return new Promise((resolve, reject) => {
       wx.FileSystemManager().writeFile(
         {
@@ -128,7 +134,7 @@ class Util{
       )
     })
   }
-  rmFile(option) {
+  async rmFile(option) {
     return new Promise((resolve, reject) => {
       wx.FileSystemManager().unlinkFile(
         {
@@ -140,7 +146,7 @@ class Util{
     })
   }
   //storage
-  setStorage(key,value) {
+  async setStorage(key,value) {
     return new Promise((resolve, reject) => {
       try{
         let data = JSON.stringify(value)
@@ -155,7 +161,7 @@ class Util{
       }
     })
   }
-  getStorage(key) {
+  async getStorage(key) {
     return new Promise((resolve, reject) => {
       try{
         wx.getStorage({
@@ -170,7 +176,7 @@ class Util{
       }
     })
   }
-  getStorageInfo() {
+  async getStorageInfo() {
     return new Promise((resolve, reject) => {
       wx.getStorageInfo({
         success: (res) => resolve(res),
@@ -178,7 +184,7 @@ class Util{
       })
     })
   }
-  clearStorageInfo() {
+  async clearStorageInfo() {
     return new Promise((resolve, reject) => {
       wx.clearStorageInfo({
         success: (res) => resolve(res),
@@ -186,7 +192,7 @@ class Util{
       })
     })
   }
-  removeStorage(key) {
+  async removeStorage(key) {
     return new Promise((resolve, reject) => {
       wx.removeStorage({
         key : key,
@@ -197,7 +203,7 @@ class Util{
   }
 
   //获取网络数据
-  request(option) {
+  async request(option) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: option.url,
@@ -209,7 +215,7 @@ class Util{
       })
     })
   }
-  downloadFile(option,pgComponent,key){
+  async downloadFile(option,pgComponent,key){
     //pgComponent是一个progress组件，key为该组件反应进度指标（0-100）的值
     return new Promise((resolve,reject)=>{
       var task = wx.downloadFile(
@@ -231,7 +237,7 @@ class Util{
       })
     })
   }
-  uploadFile(option,pgComponent,key){
+  async uploadFile(option,pgComponent,key){
     //pgComponent是一个progress组件，key为该组件反应进度指标（0-100）的值
     return new Promise((resolve, reject) => {
       var task = wx.uploadFile(
@@ -257,7 +263,7 @@ class Util{
     })
   }
   //中英文互译
-  translate(option){
+  async translate(option){
     return new Promise((resolve,reject)=>{
       plugin.translate({
         lfrom:option.lfrom,
@@ -279,27 +285,97 @@ class Util{
     })
   }
   //语音合成播放
-  speech(option){
+  async speech(content,wait=true){
     return new Promise((resolve,reject)=>{
       plugin.textToSpeech({
-        lang: option.lang||"zh_CN",
+        lang: "zh_CN",
         tts: true,
-        content: option.content,
-        obeyMuteSwitch: false,
+        content: content,
         success: function (res) {
           console.log("succ tts", res.filename)
-          wx.createInnerAudioContext({src:encodeURI(res.filename),autoplay:true})
-          wx.playVoice({
-            filePath:encodeURI(res.filename)
-          })
-          resolve(res)
+          const innerAudioContext = wx.createInnerAudioContext()
+          innerAudioContext.src = encodeURI(res.filename)
+          innerAudioContext.play()
+          if (wait){
+            innerAudioContext.onEnded(()=>{
+              resolve(res)
+            })
+          }else{
+            resolve(res)
+          }
         },
-        fail: function (res) {
-          console.log("fail tts", res)
+        fail: function (err) {
+          console.log("fail tts", err)
           reject(res)
         }
       })
     })
+  }
+
+  /*
+  list = [{ key: "eat", value: { stuff: "apple", value: 1, eDate: "2020.03.04", eTime: "07:00:00" } },
+            {key:"eat",value:{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"}},
+            {key:"eat",value:{stuff:"pear",value:3,eDate:"2020.03.04",eTime:"08:00:00"}},
+            {key:"eat",value:{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}},
+            {key:"weight",value:{value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}},
+            {key:"weight",value:{value:75,eDate:"2020.03.05",eTime:"07:30:00"}}
+           ]
+  */
+  list2json(list,key,date){
+    //将具备key为类别，value为具体数据，且具体数据中含有eDate,eTime的日期和时间的记录数组转换成json结构
+    //json的结构将以日期为键分组，然后对每个key类别形成按时间生序的对象列表
+    //例如：传入数据：
+    //list = [{key:"eat",value:{stuff:"apple",value:1,eDate:"2020.03.04",eTime:"07:00:00"}},
+    // {key:"eat",value:{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"}},
+    // {key:"eat",value:{stuff:"pear",value:3,eDate:"2020.03.04",eTime:"08:00:00"}},
+    // {key:"eat",value:{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}},
+    // {key:"weight",value:{value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}},
+    // {key:"weight",value:{value:75,eDate:"2020.03.05",eTime:"07:30:00"}}
+    // ]
+    // 输出数据:
+    // {
+    // "2020.03.04":{"eat":[{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"},
+    // { stuff: "apple", value: 1, eDate: "2020.03.04", eTime: "07:00:00" },
+    // { stuff: "pear", value: 3, eDate: "2020.03.04", eTime: "08:00:00" }]},
+    // "2020.03.05":{"eat":[{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}],
+    // "weight":[{value:75,eDate:"2020.03.05",eTime:"07:30:00"},
+    // {value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}]
+    // }
+    try {
+      let res1, res2, res3
+      res1 = _.chain(list).filter(x => x.key == key || !key).filter(x => x.date == date || !date)
+      res2 = res1.groupBy(x => x.value.eDate).mapObject(x => _.sortBy(x, y => y.value.eTime))
+      res3 = res2.mapObject(x => {
+        return _.chain(x).groupBy(y => y.key).mapObject(y => _.map(y, z => z.value)).value()
+      }).value()
+      return res3
+    }catch(err){
+      console.log("!!!!!","list2json函数出错",list,err)
+    } 
+  }
+  combData(data,sDate,eDate){
+    //将标准的数据结构按指定的日期区间合并，合并后数据按eDate，eTime排序
+    //标准的数据结构来自mongo数据库，或list2json函数
+    //例如输入数据:
+    // {
+    //   "2020.03.04":{"eat":[{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"},
+    //                      { stuff: "apple", value: 1, eDate: "2020.03.04", eTime: "07:00:00" },
+    //                      { stuff: "pear", value: 3, eDate: "2020.03.04", eTime: "08:00:00" }]},
+    //   "2020.03.05":{"eat":[{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}],
+    //               "weight":[{value:75,eDate:"2020.03.05",eTime:"07:30:00"},
+    //                         {value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}]
+    // }
+    // 输出数据为:
+    // {
+    //   start:"2020.03.04",end:"2020.03.05",
+    //     value:{"eat":[{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"},
+    //                   {stuff: "apple", value: 1, eDate: "2020.03.04", eTime: "07:00:00" },
+    //                   {stuff: "pear", value: 3, eDate: "2020.03.04", eTime: "08:00:00" },
+    //                   {stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}],
+    //            "weight":[{value:75,eDate:"2020.03.05",eTime:"07:30:00"},
+    //                      {value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}]
+    // }
+    return data
   }
 }
 
@@ -309,7 +385,7 @@ class Map{
   constructor(id){
     this.ctx = wx.createMapContext(id,this)
   }
-  moveTo(option={}){
+  async moveTo(option={}){
     return new Promise((resolve,reject)=>{
       this.ctx.moveToLocation({
         longitude: option.longitude || null,
@@ -319,7 +395,7 @@ class Map{
       })
     })
   }
-  getLocation(option={}){
+  async getLocation(option={}){
     return new Promise((resolve,reject)=>{
       wx.getLocation({
         type:option.type,
@@ -328,7 +404,7 @@ class Map{
       })
     })
   }
-  startUpdate(option={background:true,onChange:null}){
+  async startUpdate(option={background:true,onChange:null}){
     return new Promise((resolve,reject)=>{
       if (option.background){
         wx.startLocationUpdateBackground({
@@ -349,7 +425,7 @@ class Map{
       }
     })
   }
-  stopUpdate(){
+  async stopUpdate(){
     return new Promise((resolve,reject)=>{
       wx.stopLocationUpdate({
         success:(res)=>{
@@ -386,67 +462,9 @@ class Record{
     this.audio.stop()
   }
 }
-class BaiduAI{
-  constructor(baseURL){
-    this.baseURL = baseURL
-    this.accessTokenText  ="24.9ffd022b10bee899135b55f95ebc3552.2592000.1583575700.282335-18401314"
-    this.accessTokenPic ="24.a17d67af3872c1938ede5b73021f0e2e.2592000.1583635267.282335-18405725"
-  }
-  async getImageB64(ipfsHash){
-    return new Promise((resolve,reject)=>{
-      util.downloadFile({
-        url:`${this.baseURL}/img/download/${ipfsHash}`
-      }).then((res1)=>{
-        util.readFile({
-          filePath: res1.tempFilePath,
-          encoding: "base64"
-        }).then(resolve).catch(reject)
-      }).catch(reject)
-    })
-  }
-  async table2textParse(imgB64){
-    return new Promise((resolve,reject)=>{
-      util.request({
-        url: `https://aip.baidubce.com/rest/2.0/solution/v1/form_ocr/request?access_token=${this.accessTokenText}`,
-        method: "post",
-        header: { "content-type": "application/x-www-form-urlencoded" },
-        data: {
-          image: imgB64,
-          is_sync: true,
-          request_type: "json"
-        }
-      }).then(resolve).catch(reject)
-    })
-  }
-  async general2textParse(imgB64){
-    return new Promise((resolve,reject)=>{
-      util.request({
-        url: `https://aip.baidubce.com/rest/2.0/ocr/v1/accurate?access_token=${this.accessTokenText}`,
-        method: "post",
-        header: { "content-type": "application/x-www-form-urlencoded" },
-        data: {
-          image: imgB64
-        }
-      }).then(resolve).catch(reject)
-    })
-  }
-  async general2objParse(imgB64){
-    return new Promise((resolve,reject)=>{
-      util.request({
-        url: `https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general?access_token=${this.accessTokenPic}`,
-        method: "post",
-        header: { "content-type": "application/x-www-form-urlencoded" },
-        data: {
-          image: imgB64
-        }
-      }).then(resolve).catch(reject)
-    })
-  }
-}
 
 module.exports = {
   util  : util,
   Map   : Map,
-  Record: Record,
-  BaiduAI:BaiduAI
+  Record: Record
 }

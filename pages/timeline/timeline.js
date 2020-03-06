@@ -1,4 +1,5 @@
-const {util,BaiduAI}=require("../../utils/util.js")
+const {util}=require("../../utils/util.js")
+const {BaiduAI} = require("../../utils/baiduAI.js")
 const app = getApp()
 const bdAI = new BaiduAI(app.globalData.baseURL)
 

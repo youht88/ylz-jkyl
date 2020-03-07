@@ -154,6 +154,25 @@ Page({
     //this.data.items.push()
     let value = obj.msg
     let temp,res1,res2
+    if (value.match(new RegExp(`^(建议)`))){
+       let data = this.data.data
+         .filter(x=>x.eat)
+         .map(x=>{return {
+           "20200306":x
+          }})
+       console.log("data:", data)
+       temp = await util.request({
+         url:`${app.globalData.baseURL}/food/analyse`,
+         method:"post",
+         data:{
+           data:JSON.stringify(data),
+           date:"20200304"
+         }
+       })
+       console.log("temp:",temp)
+       util.showToast("分析完毕!") 
+       return
+    }
     if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*营养成分`))){
       let nutrition = await bdAI.parseNutritionPic(this.data.currentImgHash)
       if (nutrition){ 

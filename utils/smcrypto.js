@@ -75,6 +75,9 @@ class SMcrypto{
   sha256(message){
     return sha256(message)
   }
+  exportAddress(){
+    return this.sha256(this.publicKey).substr(32)
+  }
   //ArrayBuffer转字符串
   ab2str(arrayBuffer) {
     try{

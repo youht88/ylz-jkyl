@@ -5,8 +5,8 @@
 
 <form>
 	<view class="cu-form-group margin-top">
-		<view class="title">Ad</view>
-		<text class="text-xs text-green text-cut">{{address}}</text>
+		<view class="title">健康钱包</view>
+		<text class="text-green text-cut">{{address}}</text>
 	</view>
 	<view class="cu-form-group">
 		<view class="title">助记串</view>

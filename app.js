@@ -65,7 +65,7 @@ App({
     this.globalData.IconSelf = ""
 
     this.globalData.crypto = crypto
-    this.globalData.address = crypto.sha256(crypto.publicKey) 
+    this.globalData.address = crypto.exportAddress()
   },
   globalData: {
     userInfo: null

@@ -153,6 +153,31 @@ Page({
   async _add(obj,type){
     let value = obj.msg
     let temp,res1,res2
+    let cid,data,path
+    if (value.match(new RegExp("ipfs.put"))) {
+      temp = await util.request({
+         url:`${app.globalData.baseURL}/ipfs/dagPut`,
+         method:"post",
+         data:{data:this.data.data}
+      })
+      cid = temp.data
+      util.setClipboardData(cid)
+      //util.showModal("返回结果",cid)
+      this._add({msg:cid},"info")
+      return
+    }
+    if (value.match(new RegExp("^ipfs.get"))) {
+      cid = await util.getClipboardData()
+      path= value.split(":")[1]
+      temp = await util.request({
+        url: `${app.globalData.baseURL}/ipfs/dagGet`,
+        method: "post",
+        data: { cid: cid ,path:path}
+      })
+      util.showModal("返回结果", JSON.stringify(temp.data))
+      return
+    }
+
     if (value.match(new RegExp("^播放"))){
       await util.speech("还有其他吗",true)
       await util.speech("估计没有了",true)
@@ -181,10 +206,20 @@ Page({
     if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*营养成分`))){
       let nutrition = await bdAI.parseNutritionPic(this.data.currentImgHash)
       if (nutrition){ 
-       await util.showModal(JSON.stringify(nutrition))
-    }
+       await util.showModal("营养成分",JSON.stringify(nutrition))
+      }
       return 
     }
+    
+    if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*表格`))) {
+      let table = await bdAI.parseTablePic(this.data.currentImgHash)
+      if (table) {
+        console.log("table:",table.forms)
+        await util.showModal("表格数据",JSON.stringify(table))
+      }
+      return
+    }
+
     if (this.data.currentEat && type!="info" && value.match(new RegExp(`^(吃了|喝了|抽了)`))) {
       value=value+this.data.currentEat
       this.setData({ currentEat: "" })

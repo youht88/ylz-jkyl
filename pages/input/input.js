@@ -74,7 +74,7 @@ Page({
       })
       var data = this.data.items.map(x => {
         switch (x.type) {
-          case "eat": return {"eat":x.msg}
+          case "eat": return {key:"eat",value:x.msg}
           case "sign_weightKg": return { key:"sign_weightKg",value:x.msg}
           case "emotion": return { key:"emotion", value:x.msg }
           case "behavior": return { key:"behavior",value:x.msg }
@@ -149,29 +149,34 @@ Page({
     record.stopRec()
     this.setData({color:"blue"})
   }, 
-
+ 
   async _add(obj,type){
-    //this.data.items.push()
     let value = obj.msg
     let temp,res1,res2
-    if (value.match(new RegExp(`^(建议)`))){
-       let data = this.data.data
-         .filter(x=>x.eat)
-         .map(x=>{return {
-           "20200306":x
-          }})
-       console.log("data:", data)
-       temp = await util.request({
-         url:`${app.globalData.baseURL}/food/analyse`,
-         method:"post",
-         data:{
-           data:JSON.stringify(data),
-           date:"20200304"
-         }
-       })
-       console.log("temp:",temp)
-       util.showToast("分析完毕!") 
-       return
+    if (value.match(new RegExp("^播放"))){
+      await util.speech("还有其他吗",true)
+      await util.speech("估计没有了",true)
+      return
+    }
+
+    if (value.match(new RegExp("^建议"))){
+      temp = util.list2json(this.data.data)
+      console.log("建议1:",JSON.stringify(temp))
+      console.log("aaaaa", `${ app.globalData.baseURL }/food/analyse`)
+      res1=await util.request({
+        url:`${app.globalData.baseURL}/food/analyse`,
+        method:"post",
+        data:{
+          data:JSON.stringify(temp),
+          date:"2020.03.05"
+        }
+      })
+      console.log("建议2:",res1.data)
+      wx.navigateTo({
+        url: `/pages/chart/chart?data=${JSON.stringify(res1.data)}`,
+      })
+
+      return
     }
     if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*营养成分`))){
       let nutrition = await bdAI.parseNutritionPic(this.data.currentImgHash)
@@ -364,28 +369,7 @@ Page({
           }).catch(e => console.log(e))
       })
     })
-    this.setData({isHelp:true})
-    util.speech({ content: "0101，我是007，听到请回答！" })
-      .then((res)=>{
-        console.log("get voice...",res)
-        var pg = this.selectComponent("#progress")
-        util.downloadFile({
-          url:res.filename
-        },pg,"loading").then((res1)=>{
-          console.log("playVoice...", res1)
-          this.setData({audioFile:res1.tempFilePath})
-          console.log(this.data.audioFile)
-          wx.playVoice({
-            filePath:encodeURI(res1.tempFilePath),
-            success:((res)=>{
-              console.log("success",res)
-            }),
-            fail:((res)=>{
-              console.log("fail:",res)
-            })
-          })
-        })
-      })
+    this.setData({isHelp:true}) 
   },
   _onMark(e){
     console.log(e)

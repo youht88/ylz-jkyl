@@ -1,7 +1,7 @@
 
 <view  class="cu-chat">
   <view  class="cu-item">
-    <view class="cu-avatar round animated bounce" style="background-image:url({{IconAI}})"></view>    
+    <view class="cu-avatar round animated infinite pulse " style="background-image:url({{IconAI}})"></view>    
     <view class="main">
       <view class="content bg-gradual-green shadow">
         

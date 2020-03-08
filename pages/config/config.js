@@ -25,5 +25,8 @@ Page({
         console.log(res)
       }
     })
+  },
+  onLoad(){
+    this.setData({baseURL:app.globalData.baseURL})
   }
 })

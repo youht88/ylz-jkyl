@@ -13,13 +13,8 @@
 		<input placeholder="输入自己不会忘记的字符串"></input>
 	</view>
 	<view class="cu-form-group">
-		<view class="title">收货地址</view>
-		<input placeholder="统一标题的宽度"></input>
-	</view>
-	<view class="cu-form-group">
-		<view class="title">收货地址</view>
-		<input placeholder="输入框带个图标"></input>
-		<text class="cuIcon-locationfill text-orange"></text>
+		<view class="title">baseURL</view>
+		<text>{{baseURL}}</text>
 	</view>
 	<view class="cu-form-group">
 		<view class="title" >验证码</view>

@@ -48,7 +48,7 @@ App({
     })
     //设置程序属性
     //this.globalData.baseURL="http://web1.imac1.youht.cc:8084"
-    this.globalData.baseURL = "http://192.168.31.119:6001"
+    //this.globalData.baseURL = "http://192.168.31.119:6001"
     //this.globalData.baseURL = "http://10.10.0.199:5000"
     this.globalData.IconAnimal ="https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=4064283291,520199009&fm=74&app=80&f=JPEG&size=f121,90?sec=1880279984&t=b24f80de85ff357047609f47d65dc3b3"
     this.globalData.IconGirl ="http://pics.sc.chinaz.com/Files/pic/icons128/rw_7/Vivian%20Chow.png"
@@ -59,5 +59,8 @@ App({
   },
   globalData: {
     userInfo: null
+  },
+  changeBaseURL(baseURL){
+    this.globalData.baseURL=baseURL
   }
 })

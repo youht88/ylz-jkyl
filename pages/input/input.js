@@ -219,16 +219,19 @@ Page({
       return
     }
 
-    if (value.match(new RegExp("^建议"))){
-      temp = util.list2json(this.data.data)
-      console.log("建议1:",JSON.stringify(temp))
-      console.log("aaaaa", `${ app.globalData.baseURL }/food/analyse`)
+    if (value.match(new RegExp("^饮食建议"))){
+      temp = util.list2json(this.data.data,null,"2020.03.08","2020.03.08")
+      console.log("建议1:",JSON.stringify(temp,null,4))
+      temp = util.list2rangeJson(this.data.data,null,"2020.03.05","2020.03.08")
+      console.log("建议2:",JSON.stringify(temp,null,4))
+      console.log("建议3:", temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj?y.nutrition.energyKj[0]:0)},0))
       res1=await util.request({
         url:`${app.globalData.baseURL}/food/analyse`,
         method:"post",
         data:{
-          data:JSON.stringify(temp),
-          date:"2020.03.05"
+          data:JSON.stringify(temp.value.eat),
+          sDate:"2020.03.05",
+          eDate:"2020.03.08"
         }
       })
       console.log("建议2:",res1.data)

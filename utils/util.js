@@ -320,7 +320,7 @@ class Util{
             {key:"weight",value:{value:75,eDate:"2020.03.05",eTime:"07:30:00"}}
            ]
   */
-  list2json(list,key,date){
+  list2json(list,key,sDate,eDate){
     //将具备key为类别，value为具体数据，且具体数据中含有eDate,eTime的日期和时间的记录数组转换成json结构
     //json的结构将以日期为键分组，然后对每个key类别形成按时间生序的对象列表
     //例如：传入数据：
@@ -342,7 +342,7 @@ class Util{
     // }
     try {
       let res1, res2, res3
-      res1 = _.chain(list).filter(x => x.key == key || !key).filter(x => x.date == date || !date)
+      res1 = _.chain(list).filter(x => x.key == key || !key).filter(x => (x.value.eDate >= sDate||!sDate) && (x.value.eDate<=eDate || !eDate))
       res2 = res1.groupBy(x => x.value.eDate).mapObject(x => _.sortBy(x, y => y.value.eTime))
       res3 = res2.mapObject(x => {
         return _.chain(x).groupBy(y => y.key).mapObject(y => _.map(y, z => z.value)).value()
@@ -352,18 +352,17 @@ class Util{
       console.log("!!!!!","list2json函数出错",list,err)
     } 
   }
-  combData(data,sDate,eDate){
-    //将标准的数据结构按指定的日期区间合并，合并后数据按eDate，eTime排序
-    //标准的数据结构来自mongo数据库，或list2json函数
-    //例如输入数据:
-    // {
-    //   "2020.03.04":{"eat":[{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"},
-    //                      { stuff: "apple", value: 1, eDate: "2020.03.04", eTime: "07:00:00" },
-    //                      { stuff: "pear", value: 3, eDate: "2020.03.04", eTime: "08:00:00" }]},
-    //   "2020.03.05":{"eat":[{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}],
-    //               "weight":[{value:75,eDate:"2020.03.05",eTime:"07:30:00"},
-    //                         {value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}]
-    // }
+  list2rangeJson(list,key,sDate,eDate){
+    //将具备key为类别，value为具体数据，且具体数据中含有eDate,eTime的日期和时间的记录数组转换成json结构
+    //json的结构将以日期为键分组，然后对每个key类别形成按时间生序的对象列表
+    //例如：传入数据：
+    //list = [{key:"eat",value:{stuff:"apple",value:1,eDate:"2020.03.04",eTime:"07:00:00"}},
+    // {key:"eat",value:{stuff:"banana",value:2,eDate:"2020.03.04",eTime:"06:00:00"}},
+    // {key:"eat",value:{stuff:"pear",value:3,eDate:"2020.03.04",eTime:"08:00:00"}},
+    // {key:"eat",value:{stuff:"mongo",value:1,eDate:"2020.03.05",eTime:"07:00:00"}},
+    // {key:"weight",value:{value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}},
+    // {key:"weight",value:{value:75,eDate:"2020.03.05",eTime:"07:30:00"}}
+    // ]
     // 输出数据为:
     // {
     //   start:"2020.03.04",end:"2020.03.05",
@@ -374,7 +373,15 @@ class Util{
     //            "weight":[{value:75,eDate:"2020.03.05",eTime:"07:30:00"},
     //                      {value:77.5,eDate:"2020.03.05",eTime:"10:00:00"}]
     // }
-    return data
+    try {
+      let res1, res2, res3
+      res1 = _.chain(list).filter(x => x.key == key || !key).filter(x => (x.value.eDate >= sDate || !sDate) && (x.value.eDate <= eDate || !eDate))
+      res2 = res1.groupBy(x => x.key).mapObject(x => _.sortBy(x, y => y.value.eTime))
+      res3 = res2.mapObject(x => x.map(y => y.value)).value()
+      return {start:sDate,end:eDate,value:res3}
+    } catch (err) {
+      console.log("!!!!!", "list2rangeJson函数出错", list, err)
+    } 
   }
 }
 

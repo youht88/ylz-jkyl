@@ -12,11 +12,10 @@
 		<view class="title">助记串</view>
 		<input placeholder="输入自己不会忘记的字符串"></input>
 	</view>
-	<view class="cu-form-group">
-		<view class="title">baseURL</view>
-		<text>{{baseURL}}</text>
-	</view>
-	<view class="cu-form-group">
+	
+	<ylz-picker type="single" title="baseURL" index="{{baseURLIndex}}" picker="{{baseURL}}" bind:change="_onChangeBaseURL"/>
+	
+  <view class="cu-form-group margin-top">
 		<view class="title" >验证码</view>
 		<input placeholder="输入框带个按钮"></input>
 		<button class="cu-btn bg-green shadow" bind:tap="_onTest">验证码</button>

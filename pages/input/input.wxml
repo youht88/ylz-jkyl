@@ -16,6 +16,7 @@
   <medicine    wx:elif="{{item.type=='medicine'}}" id="item{{index}}" item="{{item}}"
   />
   <sign   wx:elif="{{item.type=='sign_weightKg'}}" id="item{{index}}" item="{{item}}"/> 
+  <sign   wx:elif="{{item.type=='sign_heartRate'}}" id="item{{index}}" item="{{item}}"/> 
   <sport   wx:elif="{{item.type=='sport_steps'}}" id="item{{index}}" item="{{item}}"/> 
   <behavior   wx:elif="{{item.type=='behavior_sleep'}}" id="item{{index}}" item="{{item}}"/> 
   <location   wx:elif="{{item.type=='location'}}" id="item{{index}}" item="{{item}}"/> 

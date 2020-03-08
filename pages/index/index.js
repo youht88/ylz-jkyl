@@ -59,7 +59,6 @@ Page({
     map = new Map("map")
     this._onMoveTo()
     console.log("wx.env.USER_DATA_PATH:",wx.env.USER_DATA_PATH)
-    await this.configBaseURL()
     this.doTest()
     wx.navigateTo({url:"/pages/input/input"})
   },
@@ -73,19 +72,5 @@ Page({
   },
   doTest(){
     
-  },
-  async configBaseURL(){
-    let base = ["http://192.168.31.119:6001",
-                "http://10.10.0.199:5000"
-               ]
-    let index
-    try{
-      index  = await util.showActionSheet(base)
-    }catch(e){
-      console.log("no choise")
-      index=0
-    }
-    app.changeBaseURL(base[index])
-    console.log("baseURL",app.globalData.baseURL)    
   }
 })

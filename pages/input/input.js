@@ -219,19 +219,31 @@ Page({
       return
     }
 
-    if (value.match(new RegExp("^饮食建议"))){
-      temp = util.list2json(this.data.data,null,"2020.03.08","2020.03.08")
+    if (value.match(new RegExp("饮食情况"))){
+      temp = await util.request({
+        url:`${app.globalData.baseURL}/moment/parse/${value}`
+      })
+      console.log(temp)
+      let eDate = temp.data.eDate
+      let sDate = temp.data.sDate
+      if (!sDate) sDate=eDate
+      temp = util.list2json(this.data.data,null,sDate,eDate)
       console.log("建议1:",JSON.stringify(temp,null,4))
-      temp = util.list2rangeJson(this.data.data,null,"2020.03.05","2020.03.08")
+      temp = util.list2rangeJson(this.data.data,null,sDate,eDate)
+      if (!temp.value.eat) {
+        util.showModal("结果", "没有查到数据")
+        return
+      }
       console.log("建议2:",JSON.stringify(temp,null,4))
-      console.log("建议3:", temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj?y.nutrition.energyKj[0]:0)},0))
+      this._add({msg:"能量摄入达:"+temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj?y.nutrition.energyKj[0]:0)},0)},"info")
+      console.log("temp.value.eat", temp.value.eat)
       res1=await util.request({
         url:`${app.globalData.baseURL}/food/analyse`,
         method:"post",
         data:{
           data:JSON.stringify(temp.value.eat),
-          sDate:"2020.03.05",
-          eDate:"2020.03.08"
+          sDate:sDate,
+          eDate:eDate
         }
       })
       console.log("建议2:",res1.data)

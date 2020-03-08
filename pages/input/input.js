@@ -1,10 +1,10 @@
 const app = getApp();
 const _ = require('underscore')
-const SMcrypto = require("../../utils/smcrypto.js").SMcrypto
 const {util,Record} = require("../../utils/util.js")
 const {BaiduAI} = require("../../utils/baiduAI.js")
 var record= new Record()
 var interval
+var crypto = app.globalData.crypto
 
 const bdAI = new BaiduAI(app.globalData.baseURL)
 
@@ -153,7 +153,8 @@ Page({
   async _add(obj,type){
     let value = obj.msg
     let temp,res1,res2
-    let cid,data,path
+    let cid,data,path,cryptCid,dbid,sign,verify
+
     if (value.match(new RegExp("ipfs.put"))) {
       temp = await util.request({
          url:`${app.globalData.baseURL}/ipfs/dagPut`,
@@ -161,26 +162,60 @@ Page({
          data:{data:this.data.data}
       })
       cid = temp.data
-      util.setClipboardData(cid)
+      cryptCid = crypto.encrypt(cid)
+      sign = crypto.sign(cryptCid, crypto.privatKey)
+      temp = await util.request({
+        url:`${app.globalData.baseURL}/db/save`,
+        method:"post",
+        data:{data:{
+          address:app.globalData.address,
+          data:cryptCid,
+          publicKey:crypto.publicKey,
+          sign:sign,
+          timestamp:new Date()
+        }}
+      })
+      console.log("result from db:",temp)
       //util.showModal("返回结果",cid)
-      this._add({msg:cid},"info")
+      dbid = temp.data.insertedId
+      util.setClipboardData(dbid)
+      this._add({msg:dbid},"info")
       return
     }
     if (value.match(new RegExp("^ipfs.get"))) {
-      cid = await util.getClipboardData()
+      dbid = await util.getClipboardData()
+      console.log("ipfs.get->dbid:",dbid)
       path= value.split(":")[1]
       temp = await util.request({
-        url: `${app.globalData.baseURL}/ipfs/dagGet`,
-        method: "post",
-        data: { cid: cid ,path:path}
+        url: `${app.globalData.baseURL}/db/fetch/${dbid}`,
+        method: "get"
       })
-      util.showModal("返回结果", JSON.stringify(temp.data))
+      //验证
+      cryptCid = temp.data.data
+      sign  = temp.data.sign
+      verify = crypto.verify(cryptCid, sign)
+      if (!verify) {
+        wx.showToast("验证签名失败","none")
+        return
+      }
+      cid = crypto.decrypt(cryptCid)
+      if (cid){
+        temp = await util.request({
+          url: `${app.globalData.baseURL}/ipfs/dagGet`,
+          method: "post",
+          data: { cid: cid ,path:path}
+        })
+        util.showModal("返回结果", JSON.stringify(temp.data))
+      }else{
+        util.showModal("返回结果","执行失败!")
+      }
       return
     }
 
     if (value.match(new RegExp("^播放"))){
-      await util.speech("还有其他吗",true)
-      await util.speech("估计没有了",true)
+      temp =value.split(":")[1]
+      await util.speech(temp,true)
+      await util.speech("播报完毕",true)
       return
     }
 
@@ -250,7 +285,8 @@ Page({
           if (x=="eat"){
             let food = await util.request({url:`${app.globalData.baseURL}/food/${y.stuff}`})
             if (food.data.length==0){
-              console.log("no")
+
+              console.log("no",food.data)
               this.data.items.push({ msg: y, type: x, dateTime: (new Date()).toISOString() })
               this.data.data.push({ key: x, value: y })  
             }else{
@@ -264,6 +300,9 @@ Page({
                 let idx = await util.showActionSheet(food.data)
                 res2 = await util.request({
                   url: `${app.globalData.baseURL}/food/${food.data[idx].split(":")[1]}/${y.value}/${y.unit}`})
+              }
+              if (res2.data.type=="MD"){//药品
+                x="medicine"
               }
               this.data.items.push({
                 msg: {

@@ -10,6 +10,7 @@
     "behavior": "/components/behavior/behavior",
     "location": "/components/location/location",
     "chart": "/components/chart/chart",
-    "photo": "/components/photo/photo"
+    "photo": "/components/photo/photo",
+    "medicine": "/components/medicine/medicine"
   }
 }

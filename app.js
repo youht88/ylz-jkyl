@@ -1,20 +1,10 @@
 //app.js
 const SMcrypto = require("/utils/smcrypto.js").SMcrypto
-
+const crypto = new SMcrypto()
 App({
   onLaunch: function() {
     // 本地密钥体系
-    var crypto
-    var keyStr = wx.getStorageSync("keys")
-    console.log("keys:", keyStr)
-    if (!keyStr) {
-      crypto = new SMcrypto({ generate: true })
-      wx.setStorageSync("keys", JSON.stringify({ publicKey: crypto.publicKey, privateKey: crypto.privateKey}))
-      console.log("privatekey1:", crypto.privateKey)
-    } else {
-      crypto = new SMcrypto(JSON.parse(keyStr))
-      console.log("privatekey2:", crypto.privateKey)
-    }
+    console.log("keys:",crypto)
     // 登录
     wx.login({
       success: res => {

@@ -284,7 +284,7 @@ class Util{
     })
   }
   //语音合成播放
-  async speech(content,wait=true){
+  async speech(content,wait=true,sec){
     return new Promise((resolve,reject)=>{
       plugin.textToSpeech({
         lang: "zh_CN",

@@ -2,8 +2,8 @@ const util = require("./util.js").util
 class BaiduAI{
   constructor(baseURL){
     this.baseURL = baseURL
-    this.accessTokenText  ="24.9ffd022b10bee899135b55f95ebc3552.2592000.1583575700.282335-18401314"
-    this.accessTokenPic ="24.a17d67af3872c1938ede5b73021f0e2e.2592000.1583635267.282335-18405725"
+    this.accessTokenText="24.60a30d8c2a50c28ed0de1394b6412c2d.2592000.1586531108.282335-18401314"
+    this.accessTokenPic ="24.bb28ede58dccc137c820833f2cd32113.2592000.1586484913.282335-18405725"
   }
 
   async getImageB64(ipfsHash){
@@ -53,7 +53,9 @@ class BaiduAI{
         data: {
           image: imgB64
         }
-      }).then(resolve).catch(reject)
+      }).then((res)=>{
+        resolve(res.data.result)
+      }).catch(reject)
     })
   }
   async general2tableParse(imgB64) {

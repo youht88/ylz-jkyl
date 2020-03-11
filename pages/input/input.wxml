@@ -6,7 +6,7 @@
 <view class="flex flex-director ">
 <scroll-view scroll-y scroll-into-view="item{{currIdx}}" scroll-with-animation style="height:{{Page-30}}px;z-index:100">
 <block wx:for="{{items}}" wx:key="index">
-  <saying wx:if="{{item.type=='self'}}" id="item{{index}}" item="{{item}}"/>
+  <saying wx:if="{{item.type=='saying'}}" id="item{{index}}" item="{{item}}"/>
   <info   wx:elif="{{item.type=='info'}}" id="item{{index}}" item="{{item}}" bind:tap="_onMark" data-text="{{item.text}}" imgHash="{{item.imgHash}}">
   </info>
   <eat    wx:elif="{{item.type=='eat'}}" id="item{{index}}" item="{{item}}"
@@ -21,7 +21,8 @@
   <behavior   wx:elif="{{item.type=='behavior_sleep'}}" id="item{{index}}" item="{{item}}"/> 
   <location   wx:elif="{{item.type=='location'}}" id="item{{index}}" item="{{item}}"/> 
   <chart   wx:elif="{{item.type=='chart'}}" id="item{{index}}" item="{{item}}" index="{{index}}"/> 
-  <photo   wx:elif="{{item.type=='photo'}}" id="item{{index}}" item="{{item}}"/> 
+  <photo   wx:elif="{{item.type=='photo'}}" id="item{{index}}" item="{{item}}"
+           bind:addMsg="_onAddMsg"/> 
 </block>
 
 </scroll-view>

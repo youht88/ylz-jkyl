@@ -67,7 +67,6 @@ Component({
   },
   methods:{
     PickerChange(e) {
-      console.log(e);
       this.setData({
         index: e.detail.value
       })

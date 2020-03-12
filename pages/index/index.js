@@ -55,11 +55,10 @@ Page({
   },
   //////////////////////////
   //事件处理函数
-  onLoad: function () {
+  onLoad: async function () {
     map = new Map("map")
     this._onMoveTo()
     console.log("wx.env.USER_DATA_PATH:",wx.env.USER_DATA_PATH)
-    
     this.doTest()
     wx.navigateTo({url:"/pages/input/input"})
   },

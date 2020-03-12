@@ -5,7 +5,7 @@
     <view class="main">
       <view class="content shadow">
         <view class="flex flex-direction justify-center">  
-          <image id="photo" src="{{item.src}}" mode="aspectFit" style="max-width:250px"/>  
+          <image id="photo" src="{{item.src}}" mode="aspectFit" mode="aspectFill" style="max-width:250px"/>  
           <text class="text-blue text-sm text-cut" style="width:250px" 
                 bind:tap="_onReload" data-link="{{item.msg}}">
                 {{item.msg}}

@@ -5,14 +5,15 @@ const sha256 = require('js-sha256').sha256
 
 class SMcrypto{
   constructor(options){
-    //keypair:
-    //{"publickKey":公钥,
+    //{keypair:
+    // {"publickKey":公钥,
     // "privateKey":私钥,
+    // },
     // "gen":是否生sm2密钥对,
     // "keyNane":读取或存储的文件名}
+    let keyStr 
     options=options||{}
     this.keyName = options.keyName||"key"
-    var keyStr = wx.getStorageSync(this.keyName)
     if (options.keypair){
       this.publicKey = options.keypair.publicKey
       this.privateKey = options.keypair.privateKey
@@ -20,10 +21,11 @@ class SMcrypto{
     }else if (options.gen){
       this.generateKeyPairHex()
     }else{
+      keyStr = wx.getStorageSync(this.keyName)
       if (keyStr){
         keyStr = JSON.parse(keyStr)
         this.publicKey=keyStr.publicKey
-        this.privatKey=keyStr.privateKey
+        this.privateKey=keyStr.privateKey
       }else{
         this.generateKeyPairHex()
       }
@@ -59,7 +61,7 @@ class SMcrypto{
     pubkey = pubkey?pubkey:this.publicKey
     return sm2.doEncrypt(message,pubkey,cipherMode)
   }
-  decrypt(encryptData,prvkey,cipherMode){
+  decrypt(encryptData,prvkey,cipherMode=1){
     prvkey = prvkey?prvkey:this.privateKey
     return sm2.doDecrypt(encryptData,prvkey,cipherMode=1)
   }
@@ -74,6 +76,9 @@ class SMcrypto{
   }
   sha256(message){
     return sha256(message)
+  }
+  exportAddress(){
+    return this.sha256(this.publicKey).substr(32)
   }
   //ArrayBuffer转字符串
   ab2str(arrayBuffer) {

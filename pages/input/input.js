@@ -1,10 +1,10 @@
 const app = getApp();
 const _ = require('underscore')
-const SMcrypto = require("../../utils/smcrypto.js").SMcrypto
 const {util,Record} = require("../../utils/util.js")
 const {BaiduAI} = require("../../utils/baiduAI.js")
 var record= new Record()
 var interval
+var crypto = app.globalData.crypto
 
 const bdAI = new BaiduAI(app.globalData.baseURL)
 
@@ -149,44 +149,102 @@ Page({
     record.stopRec()
     this.setData({color:"blue"})
   }, 
- 
+  
   async _add(obj,type){
     let value = obj.msg
     let temp,res1,res2
-    if (value.match(new RegExp("^ipfs.put"))) {
-      temp=JSON.stringify(this.data.data)
+    let cid,data,path,cryptCid,dbid,sign,verify
+    
+    if (value.match(new RegExp("ipfs.put"))) {
       temp = await util.request({
-        url: `${app.globalData.baseURL}/ipfs/dagPut/${temp}`
+         url:`${app.globalData.baseURL}/ipfs/dagPut`,
+         method:"post",
+         data:{data:this.data.data}
       })
-      util.showModal("result",temp.data)
-      util.setClipboardData(temp.data)
+      cid = temp.data
+      cryptCid = crypto.encrypt(cid)
+      sign = crypto.sign(cryptCid, crypto.privatKey)
+      temp = await util.request({
+        url:`${app.globalData.baseURL}/db/save`,
+        method:"post",
+        data:{data:{
+          address:app.globalData.address,
+          data:cryptCid,
+          publicKey:crypto.publicKey,
+          sign:sign,
+          timestamp:new Date()
+        }}
+      })
+      console.log("result from db:",temp)
+      //util.showModal("返回结果",cid)
+      dbid = temp.data.insertedId
+      util.setClipboardData(dbid)
+      this._add({msg:dbid},"info")
       return
     }
     if (value.match(new RegExp("^ipfs.get"))) {
-      temp = util.getClipboardData()
+      dbid = await util.getClipboardData()
+      console.log("ipfs.get->dbid:",dbid)
+      path= value.split(":")[1]
       temp = await util.request({
-        url: `${app.globalData.baseURL}/ipfs/dagGet/${temp}`
+        url: `${app.globalData.baseURL}/db/fetch/${dbid}`,
+        method: "get"
       })
-      util.showModal("result", JSON.stringify(temp))
+      //验证
+      cryptCid = temp.data.data
+      sign  = temp.data.sign
+      verify = crypto.verify(cryptCid, sign)
+      if (!verify) {
+        wx.showToast("验证签名失败","none")
+        return
+      }
+      cid = crypto.decrypt(cryptCid)
+      if (cid){
+        temp = await util.request({
+          url: `${app.globalData.baseURL}/ipfs/dagGet`,
+          method: "post",
+          data: { cid: cid ,path:path}
+        })
+        util.showModal("返回结果", JSON.stringify(temp.data))
+      }else{
+        util.showModal("返回结果","执行失败!")
+      }
       return
     }
 
     if (value.match(new RegExp("^播放"))){
-      await util.speech("还有其他吗",true)
-      await util.speech("估计没有了",true)
+      temp =value.split(":")[1]
+      await util.speech(temp,true)
+      await util.speech("播报完毕",true)
       return
     }
 
-    if (value.match(new RegExp("^建议"))){
-      temp = util.list2json(this.data.data)
-      console.log("建议1:",JSON.stringify(temp))
-      console.log("aaaaa", `${ app.globalData.baseURL }/food/analyse`)
+    if (value.match(new RegExp("饮食情况"))){
+      temp = await util.request({
+        url:`${app.globalData.baseURL}/moment/parse/${value}`
+      })
+      console.log("???????",temp)
+      let eDate = temp.data.eDate
+      let sDate = temp.data.sDate
+      if (!sDate) sDate=eDate
+      temp = util.list2json(this.data.data,null,sDate,eDate)
+      console.log("建议1:",JSON.stringify(temp,null,4))
+      temp = util.list2rangeJson(this.data.data,null,sDate,eDate)
+      if (!temp.value.eat) {
+        util.showModal("结果", "没有查到数据")
+        return
+      }
+      console.log("建议2:",JSON.stringify(temp,null,4))
+      this._add({msg:"能量摄入达:"+temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj?y.nutrition.energyKj[0]:0)},0)},"info")
+      util.speech("能量摄入达:" + temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj ? y.nutrition.energyKj[0] : 0) }, 0)+"千焦")
+      console.log("temp.value.eat", temp.value.eat)
       res1=await util.request({
         url:`${app.globalData.baseURL}/food/analyse`,
         method:"post",
         data:{
-          data:JSON.stringify(temp),
-          date:"2020.03.05"
+          data:JSON.stringify(temp.value.eat),
+          sDate:sDate,
+          eDate:eDate
         }
       })
       console.log("建议2:",res1.data)
@@ -243,7 +301,8 @@ Page({
           if (x=="eat"){
             let food = await util.request({url:`${app.globalData.baseURL}/food/${y.stuff}`})
             if (food.data.length==0){
-              console.log("no")
+
+              console.log("no",food.data)
               this.data.items.push({ msg: y, type: x, dateTime: (new Date()).toISOString() })
               this.data.data.push({ key: x, value: y })  
             }else{
@@ -257,6 +316,9 @@ Page({
                 let idx = await util.showActionSheet(food.data)
                 res2 = await util.request({
                   url: `${app.globalData.baseURL}/food/${food.data[idx].split(":")[1]}/${y.value}/${y.unit}`})
+              }
+              if (res2.data.type=="MD"){//药品
+                x="medicine"
               }
               this.data.items.push({
                 msg: {

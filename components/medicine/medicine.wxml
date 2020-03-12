@@ -3,7 +3,7 @@
   <view  class="cu-item">
     <view class="cu-avatar round animated infinite pulse " style="background-image:url({{IconAI}})"></view>    
     <view class="main">
-      <view class="content bg-gradual-green shadow">
+      <view class="content bg-gradual-orange shadow">
         
         <view class="flex flex-direction justify-start">  
           <view class="text-sm">
@@ -26,7 +26,7 @@
         </view>
         
       </view>
-      <view class="flex-sub cu-tag margin-sm bg-green">饮食</view>
+      <view class="flex-sub cu-tag margin-sm bg-orange">药品</view>
     </view>
       
     

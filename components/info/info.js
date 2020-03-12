@@ -13,5 +13,8 @@ Component({
   },
   data:{
     baseURL:app.globalData.baseURL
+  },
+  ready(){
+    
   }
 })

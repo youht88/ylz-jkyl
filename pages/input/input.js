@@ -222,7 +222,7 @@ Page({
       temp = await util.request({
         url:`${app.globalData.baseURL}/moment/parse/${value}`
       })
-      console.log("???????",temp)
+      console.log("???????",temp.data)
       let eDate = temp.data.eDate
       let sDate = temp.data.sDate
       if (!sDate) sDate=eDate
@@ -234,7 +234,7 @@ Page({
         return
       }
       console.log("建议2:",JSON.stringify(temp,null,4))
-      temp1 = "能量摄入达:" + temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj ? y.nutrition.energyKj[0] : 0) }, 0)+千焦
+      temp1 = "能量摄入达:" + temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj ? y.nutrition.energyKj[0] : 0) }, 0)+"千焦"
       util.speech(temp1,false)
       this._add({msg:temp1},"info")
       console.log("temp.value.eat", temp.value.eat)

@@ -3,7 +3,7 @@
     <view class="cu-avatar round" style="background-image:url({{IconAI}});"></view>
     
     <view class="main">
-      <view class="content bg-gradual-red shadow">
+      <view class="content bg-red shadow light">
         
         <view class="flex flex-direction justify-start">  
           <view class="text-sm">
@@ -15,9 +15,8 @@
             <text class="text-sm">{{item.msg.unit}}</text>
           </view>
         </view>
-        
+        <view class="cu-tag badge bg-red">运动</view>
       </view>
-      <view class="flex-sub cu-tag margin-sm bg-red">运动</view>
     </view>
       
     

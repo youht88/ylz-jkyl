@@ -1,11 +1,12 @@
 <view class="cu-chat">
-  <view class="cu-item self">
+  <view class="cu-item {{item.who}}">
+    <view wx:if="{{item.who!='self'}}" class="cu-avatar round" style="background-image:url({{IconAI}});"></view>
     <view class="main">
-      <view class="content bg-white shadow">
-        <text>{{item.msg}}</text>
+      <view class="content bg-yellow light shadow">
+        {{item.msg}}
       </view>
     </view>
-    <view class="cu-avatar round" style="background-image:url(https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1582012008723&di=0313c52d1339be9920becb023c7cb9d2&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201609%2F29%2F20160929122645_QwZfR.thumb.700_0.jpeg);"></view>
+    <view wx:if="{{item.who=='self'}}" class="cu-avatar round" style="background-image:url({{IconSelf}});"></view>
     <view class="date">{{item.dateTime}}</view>
   </view>
 </view>

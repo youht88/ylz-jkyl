@@ -1,4 +1,5 @@
 // pages/components/saying/saying.js
+const app = getApp()
 Component({
   options: {
     addGlobalClass: true,
@@ -10,6 +11,7 @@ Component({
     }
   },
   data: {
-
+    IconAI: app.globalData.IconAnimal,
+    IconSelf: app.globalData.IconSelf,
   },
 })

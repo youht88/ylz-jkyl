@@ -101,7 +101,7 @@ Page({
         text = "[没有检测出你的发言]"
         type="info"
       }else{
-        type="self"
+        type="saying"
       }
       console.log("识别出来的文字:", text)
       this._add({msg:text},type)
@@ -125,7 +125,7 @@ Page({
     if (!value){
       this._add({msg:"[没有检测到你的发言]"},"info")
     }else{
-     this._add({msg:value},"self")
+     this._add({msg:value},"saying","self")
     }
   },
   _onTouchStart(e){
@@ -149,10 +149,9 @@ Page({
     record.stopRec()
     this.setData({color:"blue"})
   }, 
-  
-  async _add(obj,type){
+  async _add(obj,type,who,direct=false){
     let value = obj.msg
-    let temp,res1,res2
+    let temp,temp1,res1,res2
     let cid,data,path,cryptCid,dbid,sign,verify
     
     if (value.match(new RegExp("ipfs.put"))) {
@@ -235,8 +234,9 @@ Page({
         return
       }
       console.log("建议2:",JSON.stringify(temp,null,4))
-      this._add({msg:"能量摄入达:"+temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj?y.nutrition.energyKj[0]:0)},0)},"info")
-      util.speech("能量摄入达:" + temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj ? y.nutrition.energyKj[0] : 0) }, 0)+"千焦")
+      temp1 = "能量摄入达:" + temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj ? y.nutrition.energyKj[0] : 0) }, 0)+千焦
+      util.speech(temp1,false)
+      this._add({msg:temp1},"info")
       console.log("temp.value.eat", temp.value.eat)
       res1=await util.request({
         url:`${app.globalData.baseURL}/food/analyse`,
@@ -254,29 +254,13 @@ Page({
 
       return
     }
-    if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*营养成分`))){
-      let nutrition = await bdAI.parseNutritionPic(this.data.currentImgHash)
-      if (nutrition){ 
-       await util.showModal("营养成分",JSON.stringify(nutrition))
-      }
-      return 
-    }
     
-    if (this.data.currentImgHash && value.match(new RegExp(`^(识别|分析|解析|辨析|翻译).*表格`))) {
-      let table = await bdAI.parseTablePic(this.data.currentImgHash)
-      if (table) {
-        console.log("table:",table.forms)
-        await util.showModal("表格数据",JSON.stringify(table))
-      }
-      return
-    }
-
     if (this.data.currentEat && type!="info" && value.match(new RegExp(`^(吃了|喝了|抽了)`))) {
       value=value+this.data.currentEat
       this.setData({ currentEat: "" })
     }
 
-    this.data.items.push({ msg: value, imgHash:obj.imgHash,type: type, dateTime: (new Date()).toISOString()})
+    this.data.items.push({ msg: value, imgHash:obj.imgHash,who:who,type: type, dateTime: (new Date()).toISOString()})
     this.setData({ value: ""})
     if (!value || type=="info"){
       this.setData({
@@ -343,7 +327,7 @@ Page({
               })
             }
           }else{
-            this.data.items.push({msg:y, type: x, dateTime: (new Date()).toISOString() })
+            this.data.items.push({msg:y, type: x, who:who, dateTime: (new Date()).toISOString() })
             this.data.data.push({key:x,value:y})
           }
         }))
@@ -366,7 +350,7 @@ Page({
     console.log(res)
     var tempFilePath = res.tempFilePaths[0]
     if (res){
-      this.data.items.push({ msg: "正在存入ipfs网络...", type: "photo", src: tempFilePath, dateTime: (new Date()).toISOString() })
+      this.data.items.push({ msg: "正在存入ipfs网络...", type: "photo", who:"self",src: tempFilePath, dateTime: (new Date()).toISOString() })
       this.setData({
         items: this.data.items,
         "currIdx": this.data.items.length-1
@@ -397,19 +381,10 @@ Page({
       })
       console.log("res2",res2)
       try{
-        res3=await util.request({
-          url: "https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general?access_token=24.a17d67af3872c1938ede5b73021f0e2e.2592000.1583635267.282335-18405725",
-          method: "post",
-          header: { "content-type": "application/x-www-form-urlencoded" },
-          data: {
-            image: res2.data,
-            baike_num: 0
-          }
-        })
+        res3 = await bdAI.general2objParse(res2.data)
         console.log(res3)
-        util.showToast("success")
         this.setData({
-          ["items[" + (this.data.items.length - 1) + "].what"]: res3.data.result[0]
+          ["items[" + (this.data.items.length - 1) + "].what"]: res3
         })
       }catch(err){
         util.showModal("警告", JSON.stringify(err))
@@ -610,5 +585,14 @@ Page({
       // console.log('nodes: ' + data.length);
       // console.log('links: ' + data.length);
     }, 500);
+  },
+  _onAddMsg(e){
+    let obj=e.detail
+    this.data.items.push({ msg: obj.msg, type: obj.type, who:obj.who,dateTime: (new Date()).toISOString() })
+    let temp = "items[" + (this.data.items.length - 1) + "]"
+    this.setData({
+      [temp]: this.data.items[this.data.items.length - 1],
+      "currIdx": this.data.items.length - 1
+    })
   }
 })

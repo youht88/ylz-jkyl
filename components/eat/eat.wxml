@@ -1,9 +1,9 @@
 
 <view  class="cu-chat">
-  <view  class="cu-item">
+  <view  class="cu-item {{item.who}}">
     <view class="cu-avatar round animated infinite pulse " style="background-image:url({{IconAI}})"></view>    
     <view class="main">
-      <view class="content bg-gradual-green shadow">
+      <view class="content bg-green shadow light">
         
         <view class="flex flex-direction justify-start">  
           <view class="text-sm">
@@ -16,17 +16,41 @@
             <text class="text-sm">{{item.msg.unit}}</text>
             <text class="text-sm text-cut">{{item.msg.stuff}}</text>
           </view>
-          <view class="flex flex-direction" wx:if="{{item.msg.nutrition.energyKj}}">
-            <text class="text-xs"> 能量:{{fun.round2(item.msg.nutrition.energyKj[0])}}千焦，当日占比:{{fun.percent(item.msg.nutrition.energyKj[1])}}</text>
-            <text class="text-xs"> 蛋白质:{{fun.round2(item.msg.nutrition.proteinG[0])}}克,当日占比:{{fun.percent(item.msg.nutrition.proteinG[1])}}</text>
-            <text class="text-xs"> 脂肪:{{fun.round2(item.msg.nutrition.fatG[0])}}克,当日占比:{{fun.percent(item.msg.nutrition.fatG[1])}}</text>
-            <text class="text-xs"> 碳水化物:{{fun.round2(item.msg.nutrition.chG[0])}}克,当日占比:{{fun.percent(item.msg.nutrition.chG[1])}}</text>
-            <text class="text-xs"> 钠:{{fun.round2(item.msg.nutrition.sodiumMg[0])}}毫克,当日占比:{{fun.percent(item.msg.nutrition.sodiumMg[1])}}</text>
+          <view class="flex flex-direction ">
+              <view class="cu-capsule margin-xs flex justify-between" 
+                    wx:if="{{item.msg.nutrition.energyKj}}" > 
+                  <view class=" cu-tag bg-blue light">能量</view>
+                  <view class=" cu-tag line-blue">{{fun.round2(item.msg.nutrition.energyKj[0])}}千焦</view>  
+                  <view class=" cu-tag bg-red light">{{fun.percent(item.msg.nutrition.energyKj[1])}}</view>
+              </view>
+              <view class="cu-capsule margin-xs flex justify-between" 
+                    wx:if="{{item.msg.nutrition.proteinG}}" > 
+                  <view class=" cu-tag bg-blue light">蛋白质</view>
+                  <view class=" cu-tag line-blue">{{fun.round2(item.msg.nutrition.proteinG[0])}}克</view>  
+                  <view class=" cu-tag bg-red light" >{{fun.percent(item.msg.nutrition.proteinG[1])}}</view>
+              </view>
+              <view class="cu-capsule margin-xs flex justify-between" 
+                    wx:if="{{item.msg.nutrition.fatG}}"> 
+                  <view class="cu-tag bg-blue light">脂肪</view>
+                  <view class="cu-tag line-blue">{{fun.round2(item.msg.nutrition.fatG[0])}}克</view>  
+                  <view class="cu-tag bg-red light">{{fun.percent(item.msg.nutrition.fatG[1])}}</view>
+              </view>
+              <view class="cu-capsule margin-xs flex justify-between" 
+                    wx:if="{{item.msg.nutrition.chG}}" > 
+                  <view class="col-1 cu-tag bg-blue light">碳水</view>
+                  <view class="col-2 cu-tag line-blue">{{fun.round2(item.msg.nutrition.chG[0])}}克</view>  
+                  <view class="col-1 cu-tag bg-red light">{{fun.percent(item.msg.nutrition.chG[1])}}</view>
+              </view>
+              <view class="cu-capsule margin-xs flex justify-between" 
+                    wx:if="{{item.msg.nutrition.sodiumMg}}" > 
+                  <view class="col-1 cu-tag bg-blue light">钠</view>
+                  <view class="col-2 cu-tag line-blue">{{fun.round2(item.msg.nutrition.sodiumMg[0])}}毫克</view>  
+                  <view class="col-1 cu-tag bg-red light">{{fun.percent(item.msg.nutrition.sodiumMg[1])}}</view>
+              </view>
           </view>
         </view>
-        
+       <view class="cu-tag badge bg-green animated infinite pulse">饮食</view>
       </view>
-      <view class="flex-sub cu-tag margin-sm bg-green">饮食</view>
     </view>
       
     

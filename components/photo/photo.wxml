@@ -1,21 +1,32 @@
 <view  class="cu-chat">
-  <view  class="cu-item">
-    <view class="cu-avatar round" style="background-image:url({{IconAI}});"></view>
+  <view  class="cu-item {{item.who}}">
+    <view wx:if="{{item.who!='self'}}" class="cu-avatar round" style="background-image:url({{IconAI}});"></view>
     
     <view class="main">
       <view class="content shadow">
         <view class="flex flex-direction justify-center">  
-          <image id="photo" src="{{item.src}}" mode="aspectFit" mode="aspectFill" style="max-width:250px"/>  
+          <image id="photo" src="{{item.src}}" mode="aspectFit" mode="aspectFill" style="max-width:250px"
+                 bind:tap="_onAction" data-link="{{item.msg}}"
+          >
+          </image>  
           <text class="text-blue text-sm text-cut" style="width:250px" 
                 bind:tap="_onReload" data-link="{{item.msg}}">
                 {{item.msg}}
-          </text> 
-          <text class="text-gray text-xs text-cut" style="width:250px" >
-            可能是【{{item.what.keyword}}】,可信度{{fun.round2(item.what.score*100,"%")}}
-          </text> 
+          </text>
+          <view class="flex flex-wrap">
+            <view wx:for="{{item.what}}" wx:key="index" wx:for-item="word">
+              <view class="cu-capsule margin-xs">
+                <view class="cu-tag bg-yellow"><text>{{word.keyword}}</text></view>
+                <view class="cu-tag line-yellow">{{fun.round2(word.score*100,"%")}}</view> 
+              </view>
+            </view>
+          </view>
         </view>
       </view>
     </view>
+    
+    <view wx:if="{{item.who=='self'}}" class="cu-avatar round" style="background-image:url({{IconSelf}});"></view>
+
     <view class="date"> {{item.dateTime}}</view>
   </view>
 </view>

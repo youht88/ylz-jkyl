@@ -3,7 +3,7 @@
   <view  class="cu-item">
     <view class="cu-avatar round animated infinite pulse " style="background-image:url({{IconAI}})"></view>    
     <view class="main">
-      <view class="content bg-gradual-orange shadow">
+      <view class="content bg-orange shadow light">
         
         <view class="flex flex-direction justify-start">  
           <view class="text-sm">
@@ -24,12 +24,9 @@
             <text class="text-xs"> 钠:{{fun.round2(item.msg.nutrition.sodiumMg[0])}}毫克,当日占比:{{fun.percent(item.msg.nutrition.sodiumMg[1])}}</text>
           </view>
         </view>
-        
+        <view class="cu-tag badge bg-orange">药品</view>
       </view>
-      <view class="flex-sub cu-tag margin-sm bg-orange">药品</view>
     </view>
-      
-    
     <view class="date"> {{item.dateTime}}</view>
   </view>
 </view>

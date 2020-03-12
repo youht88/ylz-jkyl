@@ -38,6 +38,7 @@ Page({
       app.changeBaseURL(this.data.baseURL[index])
     }catch(err){
       this.setData({baseURLIndex:2})
+      //fix here
       util.setStorage("baseURL","http://192.168.31.119:6001")
     }
   },

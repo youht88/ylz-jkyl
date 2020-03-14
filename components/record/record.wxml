@@ -5,12 +5,11 @@
     <view class="main">
       <view class="content shadow">
         <view class="flex flex-direction justify-center">  
-          <image id="photo" src="{{item.src}}" mode="aspectFit" mode="aspectFill" style="max-width:250px"
-                 bind:longpress="_onAction" data-link="{{item.msg}}"
-          >
-          </image>  
+         <video id="video" src="{{item.src}}" controls="{{true}}" style="max-width:250px" 
+                bind:longpress="_onAction" data-link="{{item.msg}}" />
           <text class="text-blue text-sm text-cut margin-top-sm" style="width:250px" 
-                bind:tap="_onReload" data-link="{{item.msg}}">{{item.msg}}</text>
+                bind:tap="_onReload" data-link="{{item.msg}}">{{item.msg}}
+          </text>
           <view class="flex flex-wrap">
             <view wx:for="{{item.what}}" wx:key="index" wx:for-item="word">
               <view class="cu-capsule margin-top-xs">

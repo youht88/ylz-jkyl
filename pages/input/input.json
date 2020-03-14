@@ -11,6 +11,7 @@
     "location": "/components/location/location",
     "chart": "/components/chart/chart",
     "photo": "/components/photo/photo",
-    "medicine": "/components/medicine/medicine"
+    "medicine": "/components/medicine/medicine",
+    "record": "/components/record/record"
   }
 }

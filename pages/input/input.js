@@ -7,6 +7,7 @@ var interval
 var crypto = app.globalData.crypto
 
 const bdAI = new BaiduAI(app.globalData.baseURL)
+const {query} = require("./query.js") 
 
 Page({
   data: {
@@ -217,44 +218,7 @@ Page({
       await util.speech("播报完毕",true)
       return
     }
-
-    if (value.match(new RegExp("饮食情况"))){
-      temp = await util.request({
-        url:`${app.globalData.baseURL}/moment/parse/${value}`
-      })
-      console.log("???????",temp.data)
-      let eDate = temp.data.eDate
-      let sDate = temp.data.sDate
-      if (!sDate) sDate=eDate
-      temp = util.list2json(this.data.data,null,sDate,eDate)
-      console.log("建议1:",JSON.stringify(temp,null,4))
-      temp = util.list2rangeJson(this.data.data,null,sDate,eDate)
-      if (!temp.value.eat) {
-        util.showModal("结果", "没有查到数据")
-        return
-      }
-      console.log("建议2:",JSON.stringify(temp,null,4))
-      temp1 = "能量摄入达:" + temp.value.eat.reduce((x, y) => { return x + (y.nutrition.energyKj ? y.nutrition.energyKj[0] : 0) }, 0)+"千焦"
-      util.speech(temp1,false)
-      this._add({msg:temp1},"info")
-      console.log("temp.value.eat", temp.value.eat)
-      res1=await util.request({
-        url:`${app.globalData.baseURL}/food/analyse`,
-        method:"post",
-        data:{
-          data:JSON.stringify(temp.value.eat),
-          sDate:sDate,
-          eDate:eDate
-        }
-      })
-      console.log("建议2:",res1.data)
-      wx.navigateTo({
-        url: `/pages/chart/chart?data=${JSON.stringify(res1.data)}`,
-      })
-
-      return
-    }
-    
+        
     if (this.data.currentEat && type!="info" && value.match(new RegExp(`^(吃了|喝了|抽了)`))) {
       value=value+this.data.currentEat
       this.setData({ currentEat: "" })
@@ -269,7 +233,9 @@ Page({
       })  
       return
     }
-    if (this._isGraph(value)) return
+
+    if (await query.isQuery(value,this)) return
+
     var url = `${app.globalData.baseURL}/health/parse/${value}`
     console.log("url:",url)
     res1 = await util.request({
@@ -344,6 +310,38 @@ Page({
       this.setData({isCamera:true})
     }
   },
+  async _takeRecord(){
+    let res, res1, res2, res3
+    res = await wx.chooseVideo()
+    console.log(res)
+    if (res){
+      let { tempFilePath, thumbTempFilePath } = res
+      this.data.items.push({ msg: "正在存入ipfs网络...", type: "record", who: "self", thumb:thumbTempFilePath,src: tempFilePath, dateTime: (new Date()).toISOString() })
+      this.setData({
+        items: this.data.items,
+        "currIdx": this.data.items.length - 1
+      }) 
+      //上传到服务器
+      var pg = this.selectComponent("#progress")
+      console.log("uploadFile start:", pg)
+      try {
+        res1 = await util.uploadFile({
+          url: `${app.globalData.baseURL}/ipfs/upload`,
+          filePath: tempFilePath,
+          name: "file",
+        }, pg, "loading")
+        let hash = JSON.parse(res1.data).hash
+        console.log("uploadFile end:", res1.data)
+        this.data.currentMediaHash = hash
+        util.setClipboardData(hash)
+        this.setData({
+          ["items[" + (this.data.items.length - 1) + "].msg"]: hash
+        })
+      } catch (err) {
+        console.log("uploadFile end:", err)
+      }     
+    }
+  },
   async _takePhoto(){
     let res,res1,res2,res3
     res = await util.chooseImage(true)
@@ -360,9 +358,9 @@ Page({
       console.log("uploadFile start:",pg)
       try{
         res1 = await util.uploadFile({
-            url:`${app.globalData.baseURL}/img/upload`,
+            url:`${app.globalData.baseURL}/ipfs/upload`,
             filePath:tempFilePath,
-            name:"img",
+            name:"file",
           }, pg, "loading")
         let hash = JSON.parse(res1.data).hash
         console.log("uploadFile end:", res1.data)
@@ -450,142 +448,6 @@ Page({
     })
   },
 
-  _isGraph(value){
-    var option
-    var temp
-    if (value.match("体重情况")) {
-      option = this._graphWeight()
-    }else if (value=="动态图"){
-      option = this._graphDynamic()  
-    }else{
-      return false
-    }
-    this.data.items.push({ msg: "I am echart", type: "chart", option: option, dateTime: (new Date()).toISOString() })
-    temp = "items[" + (this.data.items.length - 1) + "]"
-    this.setData({
-      [temp]: this.data.items[this.data.items.length - 1],
-      "currIdx": this.data.items.length - 1
-    })
-    return true
-  },
-  _graphWeight(){
-    var data = _.filter(this.data.data,(x)=>{
-                   return x.key == "sign_weightKg"})
-      .map(x => { 
-        return { value:x.value.value,
-                 eDate:x.value.eDate,
-                 eTime:x.value.eTime,
-             timestamp:(new Date(x.value.eDate + " " + x.value.eTime)).getTime()
-             }
-      })
-      .sort((x,y)=>{
-        return x.timestamp-y.timestamp                        
-      })
-    console.log("!!!!!",data)
-    var option = {
-      title: {
-        text: '体重情况(公斤)',
-        subtext: '测试'
-      },
-      tooltip: {},
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: data.map(x=>{
-          let date = x.eDate.split(".")
-          let time = x.eTime.split(":") 
-          return `${date[1]}/${date[2]} ${time[0]}:${time[1]}`
-        })
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: {
-          formatter: '{value}'
-        }
-      },
-      dataZoom: [
-        {
-          show: true,
-          realtime: true,
-          start: 0,
-          end: 150,
-          xAxisIndex: [0, 1]
-        },
-      ],
-      series: [{
-        name: '体重(公斤)',
-        type: 'line',
-        symbolSize: 8,
-        data: data.map(x=>{
-            return x.value
-        }),
-        markPoint: {
-          data: [
-            { type: 'max', name: '最大值' },
-            { type: 'min', name: '最小值' }
-          ]
-        },
-        markLine: {
-          data: [
-            { type: 'average', name: '平均值' }
-          ]
-        } 
-      }]
-    };
-    console.log("option:",option)
-    return option
-  },
-  _graphDynamic(){
-    var data = [{
-      fixed: true,
-      x: 2,
-      y: 2,
-      symbolSize: 20,
-      id: '-1'
-    }];
-
-    var edges = [];
-
-    option = {
-      series: [{
-        type: 'graph',
-        layout: 'force',
-        animation: false,
-        data: data,
-        force: {
-          // initLayout: 'circular'
-          // gravity: 0
-          repulsion: 100,
-          edgeLength: 5
-        },
-        edges: edges
-      }]
-    };
-
-    setInterval(function () {
-      data.push({
-        id: data.length
-      });
-      var source = Math.round((data.length - 1) * Math.random());
-      var target = Math.round((data.length - 1) * Math.random());
-      if (source !== target) {
-        edges.push({
-          source: source,
-          target: target
-        });
-      }
-      myChart.setOption({
-        series: [{
-          roam: true,
-          data: data,
-          edges: edges
-        }]
-      });
-
-      // console.log('nodes: ' + data.length);
-      // console.log('links: ' + data.length);
-    }, 500);
-  },
   _onAddMsg(e){
     let obj=e.detail
     this.data.items.push({ msg: obj.msg, type: obj.type, who:obj.who,dateTime: (new Date()).toISOString() })

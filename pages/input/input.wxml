@@ -23,6 +23,8 @@
   <chart   wx:elif="{{item.type=='chart'}}" id="item{{index}}" item="{{item}}" index="{{index}}"/> 
   <photo   wx:elif="{{item.type=='photo'}}" id="item{{index}}" item="{{item}}"
            bind:addMsg="_onAddMsg"/> 
+  <record   wx:elif="{{item.type=='record'}}" id="item{{index}}" item="{{item}}"
+           bind:addMsg="_onAddMsg1"/> 
 </block>
 
 </scroll-view>
@@ -54,13 +56,17 @@
           bind:tap1="_onCameraTap">
     <text class="cuIcon-camera"></text>
   </view>
+  <view class="bg-yellow shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx" 
+          bind:tap ="_takeRecord">
+    <text class="cuIcon-recordfill"></text>
+  </view>
   <view class="bg-orange shadow text-xxl margin-top text-center round flex align-center justify-center" style="height:100rpx"
           bind:tap="_onTest" >
     <text class="cuIcon-link"></text>
   </view>
-  <view class="action bg-yellow shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx"
+  <view class="action bg-gray shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx"
           bind:tap="_onClear" >
-    <text class="cuIcon-refresh"></text>
+    <text class="cuIcon-deletefill"></text>
   </view>
   <view class="action bg-brown shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx"
           bind:tap="_onHelp"

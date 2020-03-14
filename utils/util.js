@@ -397,7 +397,7 @@ class Util{
     try {
       let res1, res2, res3
       res1 = _.chain(list).filter(x => x.key == key || !key).filter(x => (x.value.eDate >= sDate || !sDate) && (x.value.eDate <= eDate || !eDate))
-      res2 = res1.groupBy(x => x.key).mapObject(x => _.sortBy(x, y => y.value.eTime))
+      res2 = res1.groupBy(x => x.key).mapObject(x => _.sortBy(x, y => y.value.eDate+y.value.eTime))
       res3 = res2.mapObject(x => x.map(y => y.value)).value()
       return {start:sDate,end:eDate,value:res3}
     } catch (err) {

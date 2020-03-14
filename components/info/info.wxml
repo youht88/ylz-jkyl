@@ -1,6 +1,8 @@
 <view id="item{{index}}" class="cu-chat">
     <view class="cu-info round flex">
       <view wx:if="{{imgHash}}" class="cu-avatar round lg" style="background-image:url({{baseURL}}/img/download/{{imgHash}});"></view>
-       <text style="text-overflow:ellipsis;word-wrap:break-word">{{item.msg}}</text>
+       <text style="text-overflow:ellipsis;word-wrap:break-word"
+             bind:longpress="_onLongpress" data-msg="{{item.msg}}"
+       >{{item.msg}}</text>
     </view>
 </view>

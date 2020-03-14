@@ -1,5 +1,6 @@
 // components/info/info.js
 const app = getApp()
+const {util}=require("../../utils/util.js")
 Component({
   options: {
     addGlobalClass: true,
@@ -16,5 +17,10 @@ Component({
   },
   ready(){
     
+  },
+  methods:{
+    _onLongpress(e){
+      util.setClipboardData(e.target.dataset.msg)
+    }
   }
 })

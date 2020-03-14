@@ -42,8 +42,23 @@ class Util{
     })
   }
   //交互
-  showToast(title,icon){
-    wx.showToast({title,icon})
+  async showLoading(title,timeout=10000){
+    return new Promise((resolve,reject)=>{
+      setTimeout(()=>{
+        wx.hideLoading()
+      },timeout)
+      wx.showLoading({
+        title:title,
+        success:resolve,
+        fail:reject
+      })
+    })
+  }
+  async hideLoading(){
+    wx.hideLoading()
+  }
+  async showToast(title,duration=1500){
+    wx.showToast({title,duration})
   }
   async showModal(title,content){
     return new Promise((resolve,reject)=>{
@@ -203,6 +218,7 @@ class Util{
 
   //获取网络数据
   async request(option) {
+    this.showLoading("加载数据")
     return new Promise((resolve, reject) => {
       wx.request({
         url: option.url,
@@ -210,7 +226,12 @@ class Util{
         header: option.header,
         data: option.data || {},
         success: resolve,
-        fail: reject
+        fail: error=>{
+          this.showToast("网络链接失败")
+          this.hideLoading()
+          reject(error)
+        },
+        complete:this.hideLoading
       })
     })
   }

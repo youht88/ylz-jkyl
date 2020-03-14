@@ -20,15 +20,19 @@ Component({
     _onReload(e){
       console.log(app.globalData)
       var msg = e.target.dataset.link
+      util.setClipboardData(msg)
       console.log("photo onReload", `${app.globalData.baseURL}/img/download/${msg}`)
+      util.showLoading("加载图片...",5000)
       util.downloadFile({url:`${app.globalData.baseURL}/img/download/${msg}`}).then(res=>{
+        util.hideLoading()
         console.log("download",res.tempFilePath)
         let item = this.data.item
         item.src = res.tempFilePath
         console.log(item)
         this.setData({item})
       }).catch(err=>{
-         util.showModal("下载文件错误",JSON.stringify(err))
+        util.hideLoading()
+        util.showModal("下载文件错误",JSON.stringify(err))
       })
     },
     async _onAction(e){

@@ -6,7 +6,7 @@
       <view class="content shadow">
         <view class="flex flex-direction justify-center">  
           <image id="photo" src="{{item.src}}" mode="aspectFit" mode="aspectFill" style="max-width:250px"
-                 bind:tap="_onAction" data-link="{{item.msg}}"
+                 bind:longpress="_onAction" data-link="{{item.msg}}"
           >
           </image>  
           <text class="text-blue text-sm text-cut" style="width:250px" 

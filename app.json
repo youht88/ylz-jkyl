@@ -41,5 +41,6 @@
   "navigateToMiniProgramAppIdList": [
     "wxb779d92e3d92b8a9",
     "wxdc03b02a8c326536"
-  ]  
+  ] ,
+  "resizable":true 
 }

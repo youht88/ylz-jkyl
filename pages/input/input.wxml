@@ -61,7 +61,7 @@
     <text class="cuIcon-recordfill"></text>
   </view>
   <view class="bg-orange shadow text-xxl margin-top text-center round flex align-center justify-center" style="height:100rpx"
-          bind:tap="_onTest" >
+          bind:tap="_onIpfsPut" >
     <text class="cuIcon-link"></text>
   </view>
   <view class="action bg-gray shadow margin-top text-xxl text-center round flex align-center justify-center" style="height:100rpx"

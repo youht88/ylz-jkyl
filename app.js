@@ -51,9 +51,8 @@ App({
     //this.globalData.baseURL="http://web1.imac1.youht.cc:8084"
     //this.globalData.baseURL = "http://192.168.31.119:6001"
     //this.globalData.baseURL = "http://10.10.0.199:5000"
-    util.getStorage("baseURL").then(x=>{
-      this.globalData.baseURL = x
-    })
+    this.globalData.baseURL = JSON.parse(wx.getStorageSync("baseURL"))
+
     this.globalData.IconAnimal ="https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=4064283291,520199009&fm=74&app=80&f=JPEG&size=f121,90?sec=1880279984&t=b24f80de85ff357047609f47d65dc3b3"
     this.globalData.IconGirl ="http://pics.sc.chinaz.com/Files/pic/icons128/rw_7/Vivian%20Chow.png"
     this.globalData.IconSelf = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1582012008723&di=0313c52d1339be9920becb023c7cb9d2&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201609%2F29%2F20160929122645_QwZfR.thumb.700_0.jpeg"

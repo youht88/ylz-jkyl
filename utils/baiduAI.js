@@ -1,11 +1,15 @@
+const app = getApp()
+
 const util = require("./util.js").util
 class BaiduAI{
-  constructor(baseURL){
-    this.baseURL = baseURL
+  constructor(){
+    this.baseURL = app.globalData.baseURL
     this.accessTokenText="24.60a30d8c2a50c28ed0de1394b6412c2d.2592000.1586531108.282335-18401314"
     this.accessTokenPic ="24.bb28ede58dccc137c820833f2cd32113.2592000.1586484913.282335-18405725"
   }
-
+  setBaseURL(baseURL){
+    this.baseURL = baseURL
+  }
   async getImageB64(ipfsHash){
     return new Promise((resolve,reject)=>{
       util.downloadFile({
@@ -195,5 +199,5 @@ class BaiduExtra{
 }
 
 module.exports={
-  BaiduAI : BaiduAI
+  bdAI : new BaiduAI()
 }

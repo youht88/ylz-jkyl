@@ -1,12 +1,12 @@
 const app = getApp();
 const _ = require('underscore')
 const {util,Record} = require("../../utils/util.js")
-const {BaiduAI} = require("../../utils/baiduAI.js")
+const {bdAI} = require("../../utils/baiduAI.js")
+const {ylzLink} = require("../../utils/ylzLink.js")
 var record= new Record()
 var interval
 var crypto = app.globalData.crypto
 
-const bdAI = new BaiduAI(app.globalData.baseURL)
 const {query} = require("./query.js") 
 
 Page({
@@ -96,16 +96,18 @@ Page({
     let cbStop = (res) => {
       console.log("cbStop:",res)
       let text = res.result
-      let type
+      let type,who
       if (text == '') {
         // 用户没有说话，可以做一下提示处理...
         text = "[没有检测出你的发言]"
         type="info"
+        who="system"
       }else{
         type="saying"
+        who="self"
       }
       console.log("识别出来的文字:", text)
-      this._add({msg:text},type)
+      this._add({msg:text},type,who)
     }
     record.init(cbRecognize, cbStop)
   },
@@ -150,65 +152,37 @@ Page({
     record.stopRec()
     this.setData({color:"blue"})
   }, 
+  async _onIpfsPut(){
+    let dbid = await ylzLink.setData(this.data.data)
+    util.setClipboardData(dbid)
+    this._add({ msg: `${dbid}` }, "info","system",true)
+  },
+  async _onIpfsGet(){
+
+  },
   async _add(obj,type,who,direct=false){
     let value = obj.msg
     let temp,temp1,res1,res2
     let cid,data,path,cryptCid,dbid,sign,verify
-    
-    if (value.match(new RegExp("ipfs.put"))) {
-      temp = await util.request({
-         url:`${app.globalData.baseURL}/ipfs/dagPut`,
-         method:"post",
-         data:{data:this.data.data}
+
+    if (direct){
+      this.data.items.push({ msg:obj.msg, type:type, who:who, dateTime:(new Date()).toISOString() })
+      let temp = "items[" + (this.data.items.length - 1) + "]"
+      this.setData({
+        [temp]: this.data.items[this.data.items.length - 1],
+        "currIdx": this.data.items.length - 1
       })
-      cid = temp.data
-      cryptCid = crypto.encrypt(cid)
-      sign = crypto.sign(cryptCid, crypto.privatKey)
-      temp = await util.request({
-        url:`${app.globalData.baseURL}/db/save`,
-        method:"post",
-        data:{data:{
-          address:app.globalData.address,
-          data:cryptCid,
-          publicKey:crypto.publicKey,
-          sign:sign,
-          timestamp:new Date()
-        }}
-      })
-      console.log("result from db:",temp)
-      //util.showModal("返回结果",cid)
-      dbid = temp.data.insertedId
-      util.setClipboardData(dbid)
-      this._add({msg:dbid},"info")
       return
     }
+    
+    if (value.match(new RegExp("ipfs.put"))) {
+      return this._onIpfsPut()
+    }
     if (value.match(new RegExp("^ipfs.get"))) {
-      dbid = await util.getClipboardData()
-      console.log("ipfs.get->dbid:",dbid)
+      let dbid = await util.getClipboardData()
       path= value.split(":")[1]
-      temp = await util.request({
-        url: `${app.globalData.baseURL}/db/fetch/${dbid}`,
-        method: "get"
-      })
-      //验证
-      cryptCid = temp.data.data
-      sign  = temp.data.sign
-      verify = crypto.verify(cryptCid, sign)
-      if (!verify) {
-        wx.showToast("验证签名失败","none")
-        return
-      }
-      cid = crypto.decrypt(cryptCid)
-      if (cid){
-        temp = await util.request({
-          url: `${app.globalData.baseURL}/ipfs/dagGet`,
-          method: "post",
-          data: { cid: cid ,path:path}
-        })
-        util.showModal("返回结果", JSON.stringify(temp.data))
-      }else{
-        util.showModal("返回结果","执行失败!")
-      }
+      let result = await ylzLink.getData(dbid,path)
+      this._add({ msg: `${JSON.stringify(result,null,4)}` }, "saying", "system", true)
       return
     }
 

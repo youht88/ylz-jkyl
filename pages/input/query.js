@@ -17,6 +17,7 @@ class Query{
     var option
     var res1,res2
     var sDate,eDate,temp,temp1
+    value = value.replace(new RegExp("。", "g"), "")
     if (value.match("(体重).*(情况|分析|查看|检查|状况|状态|怎么样|变化)")||
         value.match("体重$")) {
       temp = await this.parseDateRange(value)
@@ -32,7 +33,7 @@ class Query{
         })
       }
     } else if (value.match("(饮食|进食).*(情况|分析|查看|检查|状况|状态|怎么样|变化)")||
-               value.match("饮食$")) {
+               value.match(new RegExp("饮食$"))) {
       temp = await this.parseDateRange(value)
       sDate = temp.sDate
       eDate = temp.eDate
